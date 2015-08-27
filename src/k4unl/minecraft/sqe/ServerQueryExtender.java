@@ -57,13 +57,15 @@ public class ServerQueryExtender {
             DedicatedServer theServer = (DedicatedServer) event.getServer();
 
             if (theServer.getBooleanProperty("enable-query", false)) {
-                Log.info("Starting GS4 status listener");
+
                 try {
                     Field thread = ReflectionHelper.findField(theServer.getClass(), "theRConThreadQuery", "field_71342_m");
                     Field isRunning = ReflectionHelper.findField(RConThreadBase.class, "running", "field_72619_a");
+                    Log.info("Disabling vanilla query listener");
                     isRunning.setBoolean(thread.get(theServer), false);
-
+                    //Possibly that we need to wait a while before starting the new thread here..
                     RConThreadQuery theNewThread = new RConThreadQuery(theServer);
+                    Log.info("Starting Extended Query Listener");
                     thread.set(theServer, theNewThread);
                     theNewThread.startThread();
                 } catch (IllegalAccessException e) {

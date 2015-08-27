@@ -1,10 +1,15 @@
-PvPToggle
+ServerQueryExtender
 =========
 
-PvPToggle is a mod that allows users to switch whether or not they want to have PvP enabled or not.
+ServerQueryExtender is a simple mod that'll extend the ServerQuery.
+This allows you to fetch more data about your server without logging in!
+
+
 
 ## Links ##
-Curse: [http://minecraft.curseforge.com/mc-mods/223394-pvptoggle](http://minecraft.curseforge.com/mc-mods/223394-pvptoggle)
+Curse:
+
+Required mod: [K4Lib](http://minecraft.curseforge.com/mc-mods/224740-k4lib)
 
 ## License ##
 This mod is released under the MMPLv2

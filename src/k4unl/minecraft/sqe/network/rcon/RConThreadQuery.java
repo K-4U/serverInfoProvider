@@ -1,6 +1,8 @@
 package k4unl.minecraft.sqe.network.rcon;
 
+import k4unl.minecraft.sqe.lib.EnumValues;
 import k4unl.minecraft.sqe.lib.Log;
+import k4unl.minecraft.sqe.lib.Values;
 import net.minecraft.network.rcon.IServer;
 import net.minecraft.network.rcon.RConOutputStream;
 import net.minecraft.network.rcon.RConUtils;
@@ -106,23 +108,40 @@ public class RConThreadQuery extends net.minecraft.network.rcon.RConThreadQuery 
 
             switch (abyte[2]) {
                 case 8:
-                    if (!this.verifyClientAuth(p_72621_1_).booleanValue()) {
+                    if (!this.verifyClientAuth(p_72621_1_)) {
                         this.logDebug("Invalid challenge [" + socketaddress + "]");
                         return false;
                     }else{
                         this.logDebug("Asked for the special packet!");
 
                         //See if this works:
-                        List<Integer> valuesRequested = new ArrayList<Integer>();
+                        List<Values.ValuePair> valuesRequested = new ArrayList<Values.ValuePair>();
+                        EnumValues v = null;
+                        boolean lookForArgument = false;
+                        int arg = -1;
                         int a;
                         for(a = 11; a < i; a++){
-                            valuesRequested.add((int) abyte[a]);
+                            if(lookForArgument && v != null){
+                                arg = (int)abyte[a];
+                            }else {
+                                v = EnumValues.getFromNumber((int) abyte[a]);
+                                arg = -1;
+                                lookForArgument = v.isHasArgument();
+                            }
+                            if(arg >= 0 || lookForArgument == false){
+                                valuesRequested.add(new Values.ValuePair(v, arg));
+                                logDebug("Added " + v.toString() + " with arg " + arg);
+                                lookForArgument = false;
+                                v = null;
+                                arg = -1;
+                            }
+
                             logDebug("" + a + ":" + abyte[a]);
                         }
                         RConOutputStream outputStream = new RConOutputStream(1460);
                         outputStream.writeInt(0);
                         outputStream.writeByteArray(this.getRequestID(p_72621_1_.getSocketAddress()));
-                        outputStream.writeInt((MinecraftServer.getServer().worldServers[0].isDaytime() ? 1 : 0));
+                        Values.writeToOutputStream(outputStream, valuesRequested);
 
                         this.sendResponsePacket(outputStream.toByteArray(), p_72621_1_);
                         this.logDebug("Status [" + socketaddress + "]");
@@ -132,7 +151,7 @@ public class RConThreadQuery extends net.minecraft.network.rcon.RConThreadQuery 
                         return true;
                     }
                 case 0:
-                    if (!this.verifyClientAuth(p_72621_1_).booleanValue()) {
+                    if (!this.verifyClientAuth(p_72621_1_)) {
                         this.logDebug("Invalid challenge [" + socketaddress + "]");
                         return false;
                     } else if (15 == i) {

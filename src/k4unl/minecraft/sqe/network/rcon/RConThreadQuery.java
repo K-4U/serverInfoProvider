@@ -1,5 +1,8 @@
 package k4unl.minecraft.sqe.network.rcon;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.internal.LinkedTreeMap;
 import k4unl.minecraft.sqe.lib.EnumValues;
 import k4unl.minecraft.sqe.lib.Log;
 import k4unl.minecraft.sqe.lib.Values;
@@ -120,24 +123,37 @@ public class RConThreadQuery extends net.minecraft.network.rcon.RConThreadQuery 
                         boolean lookForArgument = false;
                         int arg = -1;
                         int a;
+                        String json = "";
                         for(a = 11; a < i; a++){
-                            if(lookForArgument && v != null){
-                                arg = (int)abyte[a];
-                            }else {
-                                v = EnumValues.getFromNumber((int) abyte[a]);
-                                arg = -1;
-                                lookForArgument = v.isHasArgument();
-                            }
-                            if(arg >= 0 || lookForArgument == false){
-                                valuesRequested.add(new Values.ValuePair(v, arg));
-                                logDebug("Added " + v.toString() + " with arg " + arg);
-                                lookForArgument = false;
-                                v = null;
-                                arg = -1;
-                            }
-
-                            logDebug("" + a + ":" + abyte[a]);
+                            json += (char)abyte[a];
                         }
+                        logDebug("RECV: " + json);
+                        Gson nGson = new Gson();
+                        try {
+                            List<Object> jsonList = nGson.fromJson(json, List.class);
+
+                            for(Object jsonObject : jsonList){
+                                if(jsonObject instanceof String){
+                                    EnumValues key = EnumValues.fromString(jsonObject.toString());
+                                    if(key == EnumValues.INVALID){
+                                        valuesRequested.add(new Values.ValuePair(key,jsonObject.toString()));
+                                    }else{
+                                        valuesRequested.add(new Values.ValuePair(key,0));
+                                    }
+                                    logDebug(key.toString());
+                                }else if(jsonObject instanceof LinkedTreeMap){
+                                    LinkedTreeMap jsonMap = (LinkedTreeMap) jsonObject;
+                                    if(jsonMap.containsKey("key") && jsonMap.containsKey("args")){
+                                        EnumValues key = EnumValues.fromString(jsonMap.get("key").toString());
+                                        valuesRequested.add(new Values.ValuePair(key, (int)Math.floor((Double) jsonMap.get("args"))));
+                                    }
+                                }
+                            }
+                        } catch (JsonSyntaxException e){
+                            valuesRequested.add(new Values.ValuePair(EnumValues.MISFORMED, 0));
+                            logSevere(e.getMessage());
+                        }
+
                         RConOutputStream outputStream = new RConOutputStream(1460);
                         outputStream.writeInt(0);
                         outputStream.writeByteArray(this.getRequestID(p_72621_1_.getSocketAddress()));

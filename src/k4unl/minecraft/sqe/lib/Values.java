@@ -10,23 +10,27 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Koen Beckers (K-4U)
  */
 public class Values {
+    private static Date startDate = (new Date());
 
     public static class ValuePair {
         private EnumValues value;
         private int argument;
+        private String invalid;
 
         public ValuePair(EnumValues value_, int argument_){
             value = value_;
             argument = argument_;
+        }
+
+        public ValuePair(EnumValues value_, String invalid_){
+            value = value_;
+            invalid = invalid_;
         }
 
         public EnumValues getValue() {
@@ -35,6 +39,22 @@ public class Values {
 
         public int getArgument() {
             return argument;
+        }
+
+        public String getInvalid() {
+            return invalid;
+        }
+    }
+
+    private static void putInMap(Map theMap, Object key, Object value){
+        if(theMap.containsKey(key)){
+            //merge maps
+            if(theMap.get(key) instanceof Map && value instanceof Map) {
+                ((Map) theMap.get(key)).putAll((Map) value);
+            }
+            //Otherwise, keep old info
+        }else {
+            theMap.put(key, value);
         }
     }
 
@@ -51,16 +71,22 @@ public class Values {
                     ret = getPlayers();
                     break;
                 case DAYNIGHT:
-                    ret = MinecraftServer.getServer().getEntityWorld().isDaytime();
+                    ret = getWorldDayNight(value.getArgument());
                     break;
                 case DIMENSIONS:
                     ret = getDimensions();
                     break;
+                case UPTIME:
+                    ret = getUptime();
+                    break;
                 case INVALID:
                     ret = null;
                     break;
+                case MISFORMED:
+                    ret = "MISFORMED JSON";
+                    break;
             }
-            endMap.put(value.getValue().toString(), ret);
+            putInMap(endMap, value.getValue().toString(), ret);
         }
 
         GsonBuilder builder = new GsonBuilder();
@@ -114,6 +140,20 @@ public class Values {
             return getMap(dimensionId, String.format("%02d", hour) + ":" + String.format("%02d", minute));
         }else{
             return getMap(dimensionId, "NaW");
+        }
+    }
+
+    private static Long getUptime(){
+        Date now = new Date();
+        return now.getTime() - startDate.getTime();
+    }
+
+    private static boolean getWorldDayNight(int dimensionId){
+        WorldServer w = getWorldServerForDimensionId(dimensionId);
+        if(w != null) {
+            return w.isDaytime();
+        }else{
+            return false;
         }
     }
 

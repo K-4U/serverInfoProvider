@@ -69,3 +69,30 @@ These are the variables that can be requested, along with arguments:
 
 Note that this list is not yet complete and i aim to add more stuff to it!
 
+### Examples ###
+I used a python file for testing this. I've uploaded it to pastebin: [http://pastebin.com/g2zbGHHs](http://pastebin.com/g2zbGHHs)
+
+Usage:
+
+	#!/usr/bin/python
+	import mcquery
+	import time
+	
+	print 'Ctrl-C to exit'
+	
+	host = ""
+	port=''
+	
+	if host == '':
+	    host = 'localhost'
+	if port == '': 
+	    port = 25565
+	else: 
+	    port = int(port)
+	
+	
+	print "Connecting..."
+	q = mcquery.MCQuery(host, port)
+	print "Connected."
+	
+	print q.extra_stat("time", {"key":"players", "args":"latestdeath"}, "uptime", "dimensions", {"key":"time", "args":1}, {"key":"time", "args":-1}, "deaths", {"key":"deaths", "args":"K4Unl"})

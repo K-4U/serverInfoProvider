@@ -9,10 +9,12 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import k4unl.minecraft.k4lib.lib.config.ConfigHandler;
+import k4unl.minecraft.sqe.events.EventHelper;
 import k4unl.minecraft.sqe.lib.Log;
 import k4unl.minecraft.sqe.lib.config.ModInfo;
 import k4unl.minecraft.sqe.lib.config.SQEConfig;
 import k4unl.minecraft.sqe.proxy.CommonProxy;
+import k4unl.minecraft.sqe.storage.Players;
 
 @Mod(
 	modid = ModInfo.ID,
@@ -51,7 +53,7 @@ public class ServerQueryExtender {
 
     @EventHandler
     public void load(FMLInitializationEvent event) {
-
+        EventHelper.init();
     }
 
     @EventHandler
@@ -61,6 +63,7 @@ public class ServerQueryExtender {
 
     @EventHandler
     public void onServerStart(FMLServerStartingEvent event) {
+        Players.loadPlayers();
         proxy.serverStarted(event);
     }
 }

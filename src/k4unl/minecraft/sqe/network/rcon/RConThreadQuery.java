@@ -136,16 +136,16 @@ public class RConThreadQuery extends net.minecraft.network.rcon.RConThreadQuery 
                                 if(jsonObject instanceof String){
                                     EnumValues key = EnumValues.fromString(jsonObject.toString());
                                     if(key == EnumValues.INVALID){
-                                        valuesRequested.add(new Values.ValuePair(key,jsonObject.toString()));
+                                        valuesRequested.add(new Values.ValuePair(key, jsonObject.toString()));
                                     }else{
-                                        valuesRequested.add(new Values.ValuePair(key,0));
+                                        valuesRequested.add(new Values.ValuePair(key, null));
                                     }
-                                    logDebug(key.toString());
+
                                 }else if(jsonObject instanceof LinkedTreeMap){
                                     LinkedTreeMap jsonMap = (LinkedTreeMap) jsonObject;
                                     if(jsonMap.containsKey("key") && jsonMap.containsKey("args")){
                                         EnumValues key = EnumValues.fromString(jsonMap.get("key").toString());
-                                        valuesRequested.add(new Values.ValuePair(key, (int)Math.floor((Double) jsonMap.get("args"))));
+                                        valuesRequested.add(new Values.ValuePair(key, jsonMap.get("args")));
                                     }
                                 }
                             }

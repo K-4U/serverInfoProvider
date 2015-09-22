@@ -2,7 +2,7 @@ package k4unl.minecraft.sqe.lib;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import k4unl.minecraft.k4lib.lib.Functions;
+import k4unl.minecraft.sqe.storage.Players;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.rcon.RConOutputStream;
 import net.minecraft.server.MinecraftServer;
@@ -20,10 +20,10 @@ public class Values {
 
     public static class ValuePair {
         private EnumValues value;
-        private int argument;
+        private Object argument;
         private String invalid;
 
-        public ValuePair(EnumValues value_, int argument_){
+        public ValuePair(EnumValues value_, Object argument_){
             value = value_;
             argument = argument_;
         }
@@ -37,9 +37,22 @@ public class Values {
             return value;
         }
 
-        public int getArgument() {
-            return argument;
+        public String getArgument() {
+            if(argument != null) {
+                return argument.toString().toLowerCase();
+            }else{
+                return "";
+            }
         }
+
+        public int getIntArgument() {
+            if (argument != null) {
+                return (int) (Math.floor((Double) argument));
+            }else{
+                return 0;
+            }
+        }
+
 
         public String getInvalid() {
             return invalid;
@@ -65,13 +78,16 @@ public class Values {
             Object ret = null;
             switch (value.getValue()) {
                 case TIME:
-                    ret = getWorldTime(value.getArgument());
+                    ret = getWorldTime(value.getIntArgument());
                     break;
                 case PLAYERS:
                     ret = getPlayers();
+                    if(value.getArgument().equals("latestdeath")){
+                        ret = getLatestDeaths((List<String>) ret);
+                    }
                     break;
                 case DAYNIGHT:
-                    ret = getWorldDayNight(value.getArgument());
+                    ret = getWorldDayNight(value.getIntArgument());
                     break;
                 case DIMENSIONS:
                     ret = getDimensions();
@@ -84,6 +100,15 @@ public class Values {
                     break;
                 case MISFORMED:
                     ret = "MISFORMED JSON";
+                    break;
+                case DEATHS:
+                    //Get a leaderboard of deaths, or the deaths of a player
+                    if(!value.getArgument().equals("")){
+                        ret = getDeathsByPlayer(value.getArgument());
+                    }else{
+                        ret = getDeathLeaderboard();
+                    }
+
                     break;
             }
             putInMap(endMap, value.getValue().toString(), ret);
@@ -104,6 +129,14 @@ public class Values {
 
     }
 
+    private static Map<String, String> getLatestDeaths(List<String> players) {
+        Map<String, String> ret = new HashMap<String, String>();
+        for(String p : players){
+            ret.put(p, Players.getLatestDeath(p));
+        }
+        return ret;
+    }
+
     private static Map<String, Integer> getDimensions() {
         Map<String, Integer> map = new HashMap<String, Integer>();
         for(WorldServer server : MinecraftServer.getServer().worldServers){
@@ -121,10 +154,12 @@ public class Values {
         return null;
     }
 
-    private static List<EntityPlayer> getPlayers(){
-        List<EntityPlayer> players = new ArrayList<EntityPlayer>();
+    private static List<String> getPlayers(){
+        List<String> players = new ArrayList<String>();
         for(World world : MinecraftServer.getServer().worldServers){
-            players = Functions.mergeList(world.playerEntities, players);
+            for(Object player : world.playerEntities){
+                players.add(((EntityPlayer)player).getGameProfile().getName());
+            }
         }
 
         return players;
@@ -155,6 +190,16 @@ public class Values {
         }else{
             return false;
         }
+    }
+
+    private static Map<String, Map<String, Integer>> getDeathLeaderboard(){
+
+        return getMap("LEADERBOARD", Players.getDeathLeaderboard());
+    }
+
+    private static Map<String, Map<String, Integer>> getDeathsByPlayer(String playerName){
+
+        return getMap(playerName, Players.getDeaths(playerName));
     }
 
     private static <A, B> Map<A, B> getMap(A key, B value){

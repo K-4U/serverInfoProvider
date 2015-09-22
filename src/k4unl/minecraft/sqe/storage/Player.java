@@ -19,6 +19,7 @@ public class Player {
         online = false;
         deaths = new HashMap<String, Integer>();
         lastOnline = 0;
+        latestDeath = "None";
     }
 
     public void addDeath(String cause){

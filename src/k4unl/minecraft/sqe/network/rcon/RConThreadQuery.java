@@ -3,7 +3,7 @@ package k4unl.minecraft.sqe.network.rcon;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.internal.LinkedTreeMap;
-import k4unl.minecraft.sqe.lib.EnumValues;
+import k4unl.minecraft.k4lib.network.EnumQueryValues;
 import k4unl.minecraft.sqe.lib.Log;
 import k4unl.minecraft.sqe.lib.Values;
 import net.minecraft.network.rcon.IServer;
@@ -119,7 +119,7 @@ public class RConThreadQuery extends net.minecraft.network.rcon.RConThreadQuery 
 
                         //See if this works:
                         List<Values.ValuePair> valuesRequested = new ArrayList<Values.ValuePair>();
-                        EnumValues v = null;
+                        EnumQueryValues v = null;
                         boolean lookForArgument = false;
                         int arg = -1;
                         int a;
@@ -131,26 +131,29 @@ public class RConThreadQuery extends net.minecraft.network.rcon.RConThreadQuery 
                         Gson nGson = new Gson();
                         try {
                             List<Object> jsonList = nGson.fromJson(json, List.class);
+                            if(jsonList != null) {
+                                for (Object jsonObject : jsonList) {
+                                    if (jsonObject instanceof String) {
+                                        EnumQueryValues key = EnumQueryValues.fromString(jsonObject.toString());
+                                        if (key == EnumQueryValues.INVALID) {
+                                            valuesRequested.add(new Values.ValuePair(key, jsonObject.toString()));
+                                        } else {
+                                            valuesRequested.add(new Values.ValuePair(key, null));
+                                        }
 
-                            for(Object jsonObject : jsonList){
-                                if(jsonObject instanceof String){
-                                    EnumValues key = EnumValues.fromString(jsonObject.toString());
-                                    if(key == EnumValues.INVALID){
-                                        valuesRequested.add(new Values.ValuePair(key, jsonObject.toString()));
-                                    }else{
-                                        valuesRequested.add(new Values.ValuePair(key, null));
-                                    }
-
-                                }else if(jsonObject instanceof LinkedTreeMap){
-                                    LinkedTreeMap jsonMap = (LinkedTreeMap) jsonObject;
-                                    if(jsonMap.containsKey("key") && jsonMap.containsKey("args")){
-                                        EnumValues key = EnumValues.fromString(jsonMap.get("key").toString());
-                                        valuesRequested.add(new Values.ValuePair(key, jsonMap.get("args")));
+                                    } else if (jsonObject instanceof LinkedTreeMap) {
+                                        LinkedTreeMap jsonMap = (LinkedTreeMap) jsonObject;
+                                        if (jsonMap.containsKey("key") && jsonMap.containsKey("args")) {
+                                            EnumQueryValues key = EnumQueryValues.fromString(jsonMap.get("key").toString());
+                                            valuesRequested.add(new Values.ValuePair(key, jsonMap.get("args")));
+                                        }
                                     }
                                 }
+                            }else{
+                                valuesRequested.add(new Values.ValuePair(EnumQueryValues.MISFORMED, 0));
                             }
                         } catch (JsonSyntaxException e){
-                            valuesRequested.add(new Values.ValuePair(EnumValues.MISFORMED, 0));
+                            valuesRequested.add(new Values.ValuePair(EnumQueryValues.MISFORMED, 0));
                             logSevere(e.getMessage());
                         }
 

@@ -2,6 +2,7 @@ package k4unl.minecraft.sqe.lib;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import k4unl.minecraft.k4lib.network.EnumQueryValues;
 import k4unl.minecraft.sqe.storage.Players;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.rcon.RConOutputStream;
@@ -19,21 +20,21 @@ public class Values {
     private static Date startDate = (new Date());
 
     public static class ValuePair {
-        private EnumValues value;
+        private EnumQueryValues value;
         private Object argument;
         private String invalid;
 
-        public ValuePair(EnumValues value_, Object argument_){
+        public ValuePair(EnumQueryValues value_, Object argument_){
             value = value_;
             argument = argument_;
         }
 
-        public ValuePair(EnumValues value_, String invalid_){
+        public ValuePair(EnumQueryValues value_, String invalid_){
             value = value_;
             invalid = invalid_;
         }
 
-        public EnumValues getValue() {
+        public EnumQueryValues getValue() {
             return value;
         }
 

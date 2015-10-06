@@ -111,6 +111,9 @@ public class Values {
                     }
 
                     break;
+                case WEATHER:
+                    ret = getWorldWeather(value.getIntArgument());
+                    break;
             }
             putInMap(endMap, value.getValue().toString(), ret);
         }
@@ -191,6 +194,22 @@ public class Values {
         }else{
             return false;
         }
+    }
+
+    private static Map<Integer, String> getWorldWeather(int dimensionId){
+        WorldServer w = getWorldServerForDimensionId(dimensionId);
+        if(w != null) {
+            if(w.getWorldInfo().isRaining() && w.getWorldInfo().isThundering()){
+                return getMap(dimensionId, "thunder");
+            }else if(w.getWorldInfo().isRaining()){
+                return getMap(dimensionId, "rain");
+            }else{
+                return getMap(dimensionId, "clear");
+            }
+        }else{
+            return getMap(dimensionId, "");
+        }
+
     }
 
     private static Map<String, Map<String, Integer>> getDeathLeaderboard(){

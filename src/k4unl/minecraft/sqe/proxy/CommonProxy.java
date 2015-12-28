@@ -1,13 +1,13 @@
 package k4unl.minecraft.sqe.proxy;
 
-import cpw.mods.fml.common.event.FMLServerStartingEvent;
-import cpw.mods.fml.relauncher.ReflectionHelper;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import k4unl.minecraft.sqe.lib.Log;
 import k4unl.minecraft.sqe.network.rcon.RConThreadQuery;
 import net.minecraft.network.rcon.RConThreadBase;
 import net.minecraft.server.dedicated.DedicatedServer;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.lang.reflect.Field;
 

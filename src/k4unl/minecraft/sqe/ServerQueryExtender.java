@@ -1,15 +1,5 @@
 package k4unl.minecraft.sqe;
 
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.Mod.EventHandler;
-import cpw.mods.fml.common.Mod.Instance;
-import cpw.mods.fml.common.SidedProxy;
-import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLPostInitializationEvent;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.event.FMLServerStartingEvent;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import k4unl.minecraft.k4lib.lib.config.ConfigHandler;
 import k4unl.minecraft.sqe.events.EventHelper;
 import k4unl.minecraft.sqe.lib.Log;
@@ -17,6 +7,14 @@ import k4unl.minecraft.sqe.lib.config.ModInfo;
 import k4unl.minecraft.sqe.lib.config.SQEConfig;
 import k4unl.minecraft.sqe.proxy.CommonProxy;
 import k4unl.minecraft.sqe.storage.Players;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.SidedProxy;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @Mod(
 	modid = ModInfo.ID,
@@ -34,17 +32,17 @@ public class ServerQueryExtender {
     public static CommonProxy proxy;
 
     private boolean canWork = true;
-    @Instance(value = ModInfo.ID)
+    @Mod.Instance(value = ModInfo.ID)
     public static ServerQueryExtender instance;
 
     private ConfigHandler SQEConfigHandler = new ConfigHandler();
 
-    @EventHandler
+    @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
 
         Log.init();
 
-        if(event.getSide().equals(cpw.mods.fml.relauncher.Side.CLIENT)){
+        if(event.getSide().equals(Side.CLIENT)){
             canWork = false;
             Log.error("SQE IS A SERVER ONLY MOD! IT WILL NOT WORK ON CLIENTS!");
         }else {
@@ -53,17 +51,17 @@ public class ServerQueryExtender {
         }
     }
 
-    @EventHandler
+    @Mod.EventHandler
     public void load(FMLInitializationEvent event) {
         EventHelper.init();
     }
 
-    @EventHandler
+    @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event) {
 
     }
 
-    @EventHandler
+    @Mod.EventHandler
     @SideOnly(Side.SERVER)
     public void onServerStart(FMLServerStartingEvent event) {
         Players.loadPlayers();

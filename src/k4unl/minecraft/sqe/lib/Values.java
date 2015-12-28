@@ -144,14 +144,14 @@ public class Values {
     private static Map<String, Integer> getDimensions() {
         Map<String, Integer> map = new HashMap<String, Integer>();
         for(WorldServer server : MinecraftServer.getServer().worldServers){
-            map.put(server.provider.getDimensionName(), server.provider.dimensionId);
+            map.put(server.provider.getDimensionName(), server.provider.getDimensionId());
         }
         return map;
     }
 
     private static WorldServer getWorldServerForDimensionId(int dimensionId){
         for(WorldServer server : MinecraftServer.getServer().worldServers){
-            if(server.provider.dimensionId == dimensionId){
+            if(server.provider.getDimensionId() == dimensionId){
                 return server;
             }
         }

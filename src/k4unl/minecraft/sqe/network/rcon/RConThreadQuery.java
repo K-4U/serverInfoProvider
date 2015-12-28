@@ -208,7 +208,7 @@ public class RConThreadQuery extends net.minecraft.network.rcon.RConThreadQuery 
      * Creates a query response as a byte array for the specified query DatagramPacket
      */
     private byte[] createQueryResponse(DatagramPacket p_72624_1_) throws IOException {
-        long i = MinecraftServer.getSystemTimeMillis();
+        long i = MinecraftServer.getCurrentTimeMillis();
 
         if (i < this.lastQueryResponseTime + 5000L) {
             byte[] abyte = this.output.toByteArray();
@@ -299,7 +299,7 @@ public class RConThreadQuery extends net.minecraft.network.rcon.RConThreadQuery 
      */
     private void cleanQueryClientsMap() {
         if (this.running) {
-            long i = MinecraftServer.getSystemTimeMillis();
+            long i = MinecraftServer.getCurrentTimeMillis();
 
             if (i >= this.lastAuthCheckTime + 30000L) {
                 this.lastAuthCheckTime = i;
@@ -318,7 +318,7 @@ public class RConThreadQuery extends net.minecraft.network.rcon.RConThreadQuery 
 
     public void run() {
         this.logInfo("Query running on " + this.serverHostname + ":" + this.queryPort);
-        this.lastAuthCheckTime = MinecraftServer.getSystemTimeMillis();
+        this.lastAuthCheckTime = MinecraftServer.getCurrentTimeMillis();
         this.incomingPacket = new DatagramPacket(this.buffer, this.buffer.length);
 
         this.running = true;
@@ -354,7 +354,7 @@ public class RConThreadQuery extends net.minecraft.network.rcon.RConThreadQuery 
             if (0 < this.queryPort && 65535 >= this.queryPort) {
                 if (this.initQuerySystem())
                 {
-                    this.rconThread = new Thread(this, this.field_164003_c + " #42");
+                    this.rconThread = new Thread(this, this.threadName + " #42");
                     this.rconThread.start();
                     this.running = true;
                 }

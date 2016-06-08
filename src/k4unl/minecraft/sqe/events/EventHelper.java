@@ -32,8 +32,8 @@ public class EventHelper {
 
     @SubscribeEvent
     public void playerDeathEvent(LivingDeathEvent event){
-        if(event.entityLiving instanceof EntityPlayer){
-            Players.addDeath(((EntityPlayer)event.entityLiving).getGameProfile().getName(), event.source.getDamageType());
+        if(event.getEntityLiving() instanceof EntityPlayer){
+            Players.addDeath(((EntityPlayer)event.getEntityLiving()).getGameProfile().getName(), event.getSource().getDamageType());
         }
     }
 }

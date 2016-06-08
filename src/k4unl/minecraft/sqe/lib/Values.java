@@ -2,6 +2,7 @@ package k4unl.minecraft.sqe.lib;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import k4unl.minecraft.k4lib.lib.Functions;
 import k4unl.minecraft.k4lib.network.EnumQueryValues;
 import k4unl.minecraft.sqe.storage.Players;
 import net.minecraft.entity.player.EntityPlayer;
@@ -143,15 +144,16 @@ public class Values {
 
     private static Map<String, Integer> getDimensions() {
         Map<String, Integer> map = new HashMap<String, Integer>();
-        for(WorldServer server : MinecraftServer.getServer().worldServers){
-            map.put(server.provider.getDimensionName(), server.provider.getDimensionId());
+        for(WorldServer server : Functions.getServer().worldServers){
+            //First argument is dimension name.
+            map.put(server.provider.getDimensionType().getName(), server.provider.getDimension());
         }
         return map;
     }
 
     private static WorldServer getWorldServerForDimensionId(int dimensionId){
-        for(WorldServer server : MinecraftServer.getServer().worldServers){
-            if(server.provider.getDimensionId() == dimensionId){
+        for(WorldServer server : Functions.getServer().worldServers){
+            if(server.provider.getDimension() == dimensionId){
                 return server;
             }
         }
@@ -160,7 +162,7 @@ public class Values {
 
     private static List<String> getPlayers(){
         List<String> players = new ArrayList<String>();
-        for(World world : MinecraftServer.getServer().worldServers){
+        for(World world : Functions.getServer().worldServers){
             for(Object player : world.playerEntities){
                 players.add(((EntityPlayer)player).getGameProfile().getName());
             }

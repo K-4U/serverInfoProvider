@@ -2,6 +2,7 @@ package k4unl.minecraft.sqe.lib;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import k4unl.minecraft.k4lib.lib.Functions;
 import k4unl.minecraft.k4lib.lib.Location;
 import k4unl.minecraft.k4lib.network.EnumQueryValues;
@@ -12,8 +13,13 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.rcon.RConOutputStream;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidTankProperties;
 
 import java.io.IOException;
 import java.util.*;
@@ -70,10 +76,43 @@ public class Values {
             
             if (argument != null) {
                 Gson nGson = new Gson();
-                return nGson.fromJson(getArgument(), Location.class);
+                try {
+                    return nGson.fromJson(getArgument(), Location.class);
+                } catch (JsonSyntaxException e) {
+                    return null;
+                }
             } else {
                 return null;
             }
+        }
+        
+        public EnumFacing getSideArgument() {
+            
+            if (argument != null) {
+                Gson nGson = new Gson();
+                try {
+                    Map<String, Object> arg = nGson.fromJson(getArgument(), Map.class);
+                    if (arg.containsKey("side")) {
+                        return EnumFacing.byName((String) arg.get("side"));
+                    } else {
+                        return null;
+                    }
+                } catch (JsonSyntaxException e) {
+                    return null;
+                }
+            } else {
+                return null;
+            }
+        }
+        
+        public boolean isArgumentPos() {
+            
+            return getPosArgument() != null;
+        }
+        
+        public boolean hasArgumentSide() {
+            
+            return getSideArgument() != null;
         }
         
         
@@ -99,7 +138,10 @@ public class Values {
     public static void writeToOutputStream(RConOutputStream outputStream, List<ValuePair> valueList) {
         
         Map<String, Object> endMap = new HashMap<String, Object>();
-        int blockInfoCount = 0;
+        List<Object> blockInfoMap = new ArrayList<>();
+        List<Object> RFInfoMap = new ArrayList<>();
+        List<Object> fluidInfoMap = new ArrayList<>();
+        
         for (ValuePair value : valueList) {
             Object ret = null;
             switch (value.getValue()) {
@@ -141,25 +183,46 @@ public class Values {
                     break;
                 
                 case BLOCKINFO:
-                    ret = getBlockInfo(value.getPosArgument());
+                    if (value.isArgumentPos()) {
+                        ret = getBlockInfo(value.getPosArgument());
+                    } else {
+                        ret = "No position argument";
+                    }
                     break;
                 
                 case RF:
-                    
+                    if (value.isArgumentPos()) {
+                        ret = getRFInfo(value.getPosArgument());
+                    } else {
+                        ret = "No position argument";
+                    }
                     break;
                 
                 case FLUID:
-                    
+                    if (value.isArgumentPos() && value.hasArgumentSide()) {
+                        ret = getFluidInfo(value.getPosArgument(), value.getSideArgument());
+                    } else if (!value.isArgumentPos()) {
+                        ret = "No position argument";
+                    } else {
+                        ret = "No side argument";
+                    }
                     break;
             }
-            if(value.getValue().equals(EnumQueryValues.BLOCKINFO)){
-                putInMap(endMap, value.getValue().toString() + blockInfoCount, ret);
-                blockInfoCount++;
-            }else{
+            if (value.getValue().equals(EnumQueryValues.BLOCKINFO)) {
+                blockInfoMap.add(ret);
+            } else if (value.getValue().equals(EnumQueryValues.FLUID)) {
+                fluidInfoMap.add(ret);
+            } else if (value.getValue().equals(EnumQueryValues.RF)) {
+                RFInfoMap.add(ret);
+            } else {
                 putInMap(endMap, value.getValue().toString(), ret);
             }
-            
         }
+        
+        
+        if (blockInfoMap.size() > 0) putInMap(endMap, EnumQueryValues.BLOCKINFO.toString(), blockInfoMap);
+        if (fluidInfoMap.size() > 0) putInMap(endMap, EnumQueryValues.FLUID.toString(), fluidInfoMap);
+        if (RFInfoMap.size() > 0) putInMap(endMap, EnumQueryValues.RF.toString(), RFInfoMap);
         
         GsonBuilder builder = new GsonBuilder();
         builder = builder.setPrettyPrinting();
@@ -199,36 +262,73 @@ public class Values {
         IBlockState state = loc.getBlockState(getWorldServerForDimensionId(loc.getDimension()));
         ret.put("unlocalized-name", state.getBlock().getUnlocalizedName());
         ret.put("coords", loc);
-        Map<String,Map<String, Object>> properties = new HashMap<>();
-        for (Map.Entry< IProperty<?>, Comparable<? >> entry : state.getProperties().entrySet())
-        {
+        Map<String, Map<String, Object>> properties = new HashMap<>();
+        for (Map.Entry<IProperty<?>, Comparable<?>> entry : state.getProperties().entrySet()) {
             Map<String, Object> propertyData = new HashMap<>();
             
-            IProperty<T> iproperty = (IProperty)entry.getKey();
-            T t = (T)entry.getValue();
+            IProperty<T> iproperty = (IProperty) entry.getKey();
+            T t = (T) entry.getValue();
             String s = iproperty.getName(t);
             
             String type = "";
             List<String> possibleValues = new ArrayList<>();
-            if(iproperty instanceof PropertyEnum){
+            if (iproperty instanceof PropertyDirection) {
+                type = "direction";
+            } else if (iproperty instanceof PropertyEnum) {
                 type = "enum";
             } else if (iproperty instanceof PropertyBool) {
                 type = "bool";
-            } else if(iproperty instanceof PropertyInteger) {
+            } else if (iproperty instanceof PropertyInteger) {
                 type = "int";
-            } else if(iproperty instanceof PropertyDirection) {
-                type = "direction";
+                
             }
-    
+            
             propertyData.put("type", type);
             propertyData.put("allowedValues", iproperty.getAllowedValues());
             propertyData.put("value", t);
             
             properties.put(iproperty.getName(), propertyData);
         }
-                
-                
+        
         ret.put("state", properties);
+        
+        return ret;
+    }
+    
+    private static Map<String, Object> getRFInfo(Location loc) {
+        
+        return null;
+    }
+    
+    private static Map<String, Object> getFluidInfo(Location loc, EnumFacing side) {
+        //Return a single Key-Value pair of strings.
+        Map<String, Object> ret = new HashMap<>();
+        IBlockState state = loc.getBlockState(getWorldServerForDimensionId(loc.getDimension()));
+        ret.put("unlocalized-name", state.getBlock().getUnlocalizedName());
+        ret.put("coords", loc);
+        
+        //TODO: Figure out why this gives an NPE
+        TileEntity tileEntity = loc.getTE(getWorldServerForDimensionId(loc.getDimension()));
+        if (tileEntity.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, side)) {
+            IFluidHandler cap = tileEntity.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, side);
+            
+            IFluidTankProperties tankProperties = cap.getTankProperties()[0];
+            if (tankProperties != null) {
+                FluidStack fluid = tankProperties.getContents();
+                if (fluid != null) {
+                    ret.put("level", fluid.amount);
+                    ret.put("fluid", fluid.getUnlocalizedName());
+                } else {
+                    ret.put("level", 0);
+                    ret.put("fluid", "none");
+                }
+                ret.put("capacity", tankProperties.getCapacity());
+            } else {
+                ret.put("error", "No tank properties found");
+            }
+        } else {
+            ret.put("error", "No fluid handler at these coordinates");
+        }
         
         return ret;
     }

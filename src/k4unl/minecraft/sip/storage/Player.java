@@ -1,4 +1,4 @@
-package k4unl.minecraft.sqe.storage;
+package k4unl.minecraft.sip.storage;
 
 import java.util.Date;
 import java.util.HashMap;

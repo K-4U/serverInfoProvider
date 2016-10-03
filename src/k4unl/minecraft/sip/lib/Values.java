@@ -1,13 +1,13 @@
-package k4unl.minecraft.sqe.lib;
+package k4unl.minecraft.sip.lib;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import k4unl.minecraft.k4lib.lib.Functions;
 import k4unl.minecraft.k4lib.lib.Location;
-import k4unl.minecraft.k4lib.network.EnumQueryValues;
-import k4unl.minecraft.sqe.api.ISQEEntity;
-import k4unl.minecraft.sqe.storage.Players;
+import k4unl.minecraft.k4lib.network.EnumSIPValues;
+import k4unl.minecraft.sip.api.ISIPEntity;
+import k4unl.minecraft.sip.storage.Players;
 import net.minecraft.block.properties.*;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -35,23 +35,23 @@ public class Values {
     
     public static class ValuePair {
         
-        private EnumQueryValues value;
-        private Object          argument;
-        private String          invalid;
+        private EnumSIPValues value;
+        private Object        argument;
+        private String        invalid;
         
-        public ValuePair(EnumQueryValues value_, Object argument_) {
+        public ValuePair(EnumSIPValues value_, Object argument_) {
             
             value = value_;
             argument = argument_;
         }
         
-        public ValuePair(EnumQueryValues value_, String invalid_) {
+        public ValuePair(EnumSIPValues value_, String invalid_) {
             
             value = value_;
             invalid = invalid_;
         }
         
-        public EnumQueryValues getValue() {
+        public EnumSIPValues getValue() {
             
             return value;
         }
@@ -219,11 +219,11 @@ public class Values {
                         ret = "No side argument";
                     }
             }
-            if (value.getValue().equals(EnumQueryValues.BLOCKINFO)) {
+            if (value.getValue().equals(EnumSIPValues.BLOCKINFO)) {
                 blockInfoMap.add(ret);
-            } else if (value.getValue().equals(EnumQueryValues.FLUID)) {
+            } else if (value.getValue().equals(EnumSIPValues.FLUID)) {
                 fluidInfoMap.add(ret);
-            } else if (value.getValue().equals(EnumQueryValues.RF)) {
+            } else if (value.getValue().equals(EnumSIPValues.RF)) {
                 RFInfoMap.add(ret);
             } else {
                 putInMap(endMap, value.getValue().toString(), ret);
@@ -231,9 +231,9 @@ public class Values {
         }
         
         
-        if (blockInfoMap.size() > 0) putInMap(endMap, EnumQueryValues.BLOCKINFO.toString(), blockInfoMap);
-        if (fluidInfoMap.size() > 0) putInMap(endMap, EnumQueryValues.FLUID.toString(), fluidInfoMap);
-        if (RFInfoMap.size() > 0) putInMap(endMap, EnumQueryValues.RF.toString(), RFInfoMap);
+        if (blockInfoMap.size() > 0) putInMap(endMap, EnumSIPValues.BLOCKINFO.toString(), blockInfoMap);
+        if (fluidInfoMap.size() > 0) putInMap(endMap, EnumSIPValues.FLUID.toString(), fluidInfoMap);
+        if (RFInfoMap.size() > 0) putInMap(endMap, EnumSIPValues.RF.toString(), RFInfoMap);
         
         GsonBuilder builder = new GsonBuilder();
         builder = builder.setPrettyPrinting();
@@ -290,8 +290,8 @@ public class Values {
         //Return a single Key-Value pair of strings.
         Map<String, Object> ret = new HashMap<>();
         TileEntity tileEntity = loc.getTE(getWorldServerForDimensionId(loc.getDimension()));
-        if (tileEntity instanceof ISQEEntity) {
-            Map<String, Object> functionRet = ((ISQEEntity) tileEntity).getSQEInfo();
+        if (tileEntity instanceof ISIPEntity) {
+            Map<String, Object> functionRet = ((ISIPEntity) tileEntity).getSIPInfo();
             if (functionRet != null) {
                 //Parse this to json, just to make sure it's possible.
                 GsonBuilder builder = new GsonBuilder();

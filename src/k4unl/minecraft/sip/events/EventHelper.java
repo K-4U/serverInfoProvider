@@ -1,6 +1,6 @@
-package k4unl.minecraft.sqe.events;
+package k4unl.minecraft.sip.events;
 
-import k4unl.minecraft.sqe.storage.Players;
+import k4unl.minecraft.sip.storage.Players;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;

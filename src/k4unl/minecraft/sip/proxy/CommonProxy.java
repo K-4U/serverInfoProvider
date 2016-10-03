@@ -1,7 +1,7 @@
-package k4unl.minecraft.sqe.proxy;
+package k4unl.minecraft.sip.proxy;
 
-import k4unl.minecraft.sqe.lib.Log;
-import k4unl.minecraft.sqe.network.rcon.RConThreadQuery;
+import k4unl.minecraft.sip.lib.Log;
+import k4unl.minecraft.sip.network.rcon.RConThreadQuery;
 import net.minecraft.network.rcon.RConThreadBase;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;

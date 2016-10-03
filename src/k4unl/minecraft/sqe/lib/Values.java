@@ -11,6 +11,7 @@ import k4unl.minecraft.sqe.storage.Players;
 import net.minecraft.block.properties.*;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.rcon.RConOutputStream;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -20,8 +21,9 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -207,6 +209,15 @@ public class Values {
                         ret = "No side argument";
                     }
                     break;
+                
+                case INVENTORY:
+                    if (value.isArgumentPos() && value.hasArgumentSide()){
+                        ret = getInventoryInfo(value.getPosArgument(), value.getSideArgument());
+                    } else if (!value.isArgumentPos()) {
+                        ret = "No position argument";
+                    } else {
+                        ret = "No side argument";
+                    }
             }
             if (value.getValue().equals(EnumQueryValues.BLOCKINFO)) {
                 blockInfoMap.add(ret);
@@ -227,15 +238,52 @@ public class Values {
         GsonBuilder builder = new GsonBuilder();
         builder = builder.setPrettyPrinting();
         Gson gson = builder.create();
-        String endString = gson.toJson(endMap);
-        
-        
         try {
+            String endString = gson.toJson(endMap);
+            
             outputStream.writeString(endString);
-        } catch (IOException e) {
+        } catch (Exception e){
             e.printStackTrace();
         }
         
+    }
+    
+    private static Map<String, Object> getInventoryInfo(Location loc, EnumFacing side) {
+    
+        //Return a single Key-Value pair of strings.
+        Map<String, Object> ret = new HashMap<>();
+        IBlockState state = loc.getBlockState(getWorldServerForDimensionId(loc.getDimension()));
+        ret.put("unlocalized-name", state.getBlock().getUnlocalizedName());
+        ret.put("coords", loc);
+    
+        
+        TileEntity tileEntity = loc.getTE(getWorldServerForDimensionId(loc.getDimension()));
+        if (tileEntity.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, side)) {
+            IItemHandler cap = tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, side);
+            int maxSlots = cap.getSlots();
+            
+            List<Map<String, Object>> items = new ArrayList<>();
+            for(int i = 0; i < maxSlots; i++){
+                Map<String, Object> itemMap = new HashMap<>();
+                ItemStack itemStack = cap.getStackInSlot(i);
+                if(itemStack != null) {
+                    itemMap.put("unlocalized-name", itemStack.getUnlocalizedName());
+                    itemMap.put("stacksize", itemStack.stackSize);
+                    itemMap.put("metadata", itemStack.getMetadata());
+                    itemMap.put("damage", itemStack.getItemDamage());
+                    itemMap.put("maxdamage", itemStack.getMaxDamage());
+                    itemMap.put("enchantments", itemStack.getEnchantmentTagList());
+                }else{
+                    itemMap.put("unlocalized-name", "empty");
+                }
+                items.add(i, itemMap);
+            }
+            ret.put("items", items);
+        } else {
+            ret.put("error", "No inventory at these coordinates");
+        }
+    
+        return ret;
     }
     
     private static <T extends Comparable<T>> Map<String, Object> getBlockInfo(Location loc) {

@@ -1,9 +1,9 @@
-package k4unl.minecraft.sqe.lib;
+package k4unl.minecraft.sip.lib;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import k4unl.minecraft.k4lib.network.EnumQueryValues;
-import k4unl.minecraft.sqe.storage.Players;
+import k4unl.minecraft.k4lib.network.EnumSIPValues;
+import k4unl.minecraft.sip.storage.Players;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.rcon.RConOutputStream;
 import net.minecraft.server.MinecraftServer;
@@ -20,21 +20,25 @@ public class Values {
     private static Date startDate = (new Date());
 
     public static class ValuePair {
-        private EnumQueryValues value;
-        private Object argument;
-        private String invalid;
-
-        public ValuePair(EnumQueryValues value_, Object argument_){
+       
+        private EnumSIPValues value;
+        private Object        argument;
+        private String        invalid;
+        
+        public ValuePair(EnumSIPValues value_, Object argument_) {
+            
             value = value_;
             argument = argument_;
         }
-
-        public ValuePair(EnumQueryValues value_, String invalid_){
+        
+        public ValuePair(EnumSIPValues value_, String invalid_) {
+            
             value = value_;
             invalid = invalid_;
         }
-
-        public EnumQueryValues getValue() {
+        
+        public EnumSIPValues getValue() {
+            
             return value;
         }
 
@@ -117,7 +121,6 @@ public class Values {
             }
             putInMap(endMap, value.getValue().toString(), ret);
         }
-
         GsonBuilder builder = new GsonBuilder();
         builder = builder.setPrettyPrinting();
         Gson gson = builder.create();
@@ -130,7 +133,6 @@ public class Values {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     private static Map<String, String> getLatestDeaths(List<String> players) {

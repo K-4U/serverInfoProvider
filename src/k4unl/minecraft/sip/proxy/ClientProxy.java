@@ -1,9 +1,9 @@
-package k4unl.minecraft.sqe.proxy;
+package k4unl.minecraft.sip.proxy;
 
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import k4unl.minecraft.sqe.lib.Log;
+import k4unl.minecraft.sip.lib.Log;
 
 /**
  * @author Koen Beckers (K-4U)

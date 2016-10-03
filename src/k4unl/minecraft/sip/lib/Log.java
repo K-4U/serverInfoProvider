@@ -1,7 +1,7 @@
-package k4unl.minecraft.sqe.lib;
+package k4unl.minecraft.sip.lib;
 
-import k4unl.minecraft.sqe.lib.config.ModInfo;
-import k4unl.minecraft.sqe.lib.config.SQEConfig;
+import k4unl.minecraft.sip.lib.config.ModInfo;
+import k4unl.minecraft.sip.lib.config.SIPConfig;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,7 +30,7 @@ public class Log {
 
 
     public static void debug(String message){
-        if(SQEConfig.INSTANCE.getBool("debug")){
+        if(SIPConfig.INSTANCE.getBool("debug")){
             logger.log(Level.INFO, message);
         }
     }

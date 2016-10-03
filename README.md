@@ -1,9 +1,9 @@
-ServerQueryExtender
+ServerInfoProvider
 =========
 
 ![](logo.png)
 
-ServerQueryExtender is a simple server-only mod that'll extend the ServerQuery.
+ServerInfoProvider is a simple server-only mod that'll give you access to server blocks.
 This allows you to fetch more data about your server without logging in!
 
 
@@ -25,10 +25,8 @@ Please report bugs to the issues page. Put crashlogs in a pastebin or gist!
 There is no API as of yet, however i am planning on adding one, so mods can add their own data.
 
 ## Documentation ##
-The mod works with standard [Minecraft UDP Query protocol](http://wiki.vg/Query). Make note that you do need to enable the query in the server settings for this mod to work.
-For the special data to work, you need to send a payload of integer value 8.
-After that, you request data by sending a json list of what you want.
-(Keep in mind that the entire handshake packet does not go longer than 10 bytes!
+Make note that you do need to enable the query in the server settings for this mod to work.
+All the data is sent in a JSON format
  
 ### Sending ###
 This list is in the format of either just strings, or objects with a key and args. For example, to request the time, you would send this:
@@ -70,6 +68,7 @@ These are the variables that can be requested, along with arguments:
 Note that this list is not yet complete and i aim to add more stuff to it!
 
 ### Examples ###
+THIS ISN'T CORRECT ANYMORE AS OF 03-10-2016!!!
 I used a python file for testing this. I've uploaded it to pastebin: [http://pastebin.com/g2zbGHHs](http://pastebin.com/g2zbGHHs)
 
 Usage:

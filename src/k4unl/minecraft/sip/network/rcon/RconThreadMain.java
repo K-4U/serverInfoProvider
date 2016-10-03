@@ -1,4 +1,4 @@
-package k4unl.minecraft.sqe.network.rcon;
+package k4unl.minecraft.sip.network.rcon;
 
 import net.minecraft.network.rcon.IServer;
 

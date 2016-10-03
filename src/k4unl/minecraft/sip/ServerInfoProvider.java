@@ -1,8 +1,7 @@
-package k4unl.minecraft.sqe;
+package k4unl.minecraft.sip;
 
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
-import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
@@ -11,12 +10,12 @@ import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import k4unl.minecraft.k4lib.lib.config.ConfigHandler;
-import k4unl.minecraft.sqe.events.EventHelper;
-import k4unl.minecraft.sqe.lib.Log;
-import k4unl.minecraft.sqe.lib.config.ModInfo;
-import k4unl.minecraft.sqe.lib.config.SQEConfig;
-import k4unl.minecraft.sqe.proxy.CommonProxy;
-import k4unl.minecraft.sqe.storage.Players;
+import k4unl.minecraft.sip.events.EventHelper;
+import k4unl.minecraft.sip.lib.Log;
+import k4unl.minecraft.sip.lib.config.ModInfo;
+import k4unl.minecraft.sip.lib.config.SIPConfig;
+import k4unl.minecraft.sip.proxy.CommonProxy;
+import k4unl.minecraft.sip.storage.Players;
 
 @Mod(
 	modid = ModInfo.ID,
@@ -25,17 +24,17 @@ import k4unl.minecraft.sqe.storage.Players;
 	acceptableRemoteVersions="*"
 )
 
-public class ServerQueryExtender {
+public class ServerInfoProvider {
 
     @SidedProxy(
-            clientSide = "k4unl.minecraft.sqe.proxy.ClientProxy",
-            serverSide = "k4unl.minecraft.sqe.proxy.CommonProxy"
+            clientSide = "k4unl.minecraft.sip.proxy.ClientProxy",
+            serverSide = "k4unl.minecraft.sip.proxy.CommonProxy"
     )
     public static CommonProxy proxy;
 
     private boolean canWork = true;
-    @Instance(value = ModInfo.ID)
-    public static ServerQueryExtender instance;
+    @Mod.Instance(value = ModInfo.ID)
+    public static ServerInfoProvider instance;
 
     private ConfigHandler SQEConfigHandler = new ConfigHandler();
 
@@ -48,8 +47,8 @@ public class ServerQueryExtender {
             canWork = false;
             Log.error("SQE IS A SERVER ONLY MOD! IT WILL NOT WORK ON CLIENTS!");
         }else {
-            SQEConfig.INSTANCE.init();
-            SQEConfigHandler.init(SQEConfig.INSTANCE, event.getSuggestedConfigurationFile());
+            SIPConfig.INSTANCE.init();
+            SQEConfigHandler.init(SIPConfig.INSTANCE, event.getSuggestedConfigurationFile());
         }
     }
 

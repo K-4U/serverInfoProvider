@@ -1,4 +1,4 @@
-package k4unl.minecraft.sqe.storage;
+package k4unl.minecraft.sip.storage;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -64,7 +64,7 @@ public class Players {
         String endString = gson.toJson(playerList);
 
         String p = DimensionManager.getCurrentSaveRootDirectory().getAbsolutePath();
-        p += "/sqe/players.json";
+        p += "/sip/players.json";
         File f = new File(p);
         if(!f.exists()){
             try {
@@ -91,11 +91,11 @@ public class Players {
         Gson gson = new Gson();
         String p = DimensionManager.getCurrentSaveRootDirectory().getAbsolutePath();
 
-        File d = new File(p + "/sqe/");
+        File d = new File(p + "/sip/");
         if(!d.exists()){
             d.mkdir();
         }
-        p += "/sqe/players.json";
+        p += "/sip/players.json";
         File f = new File(p);
         if(!f.exists()){
             try {

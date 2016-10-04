@@ -40,6 +40,11 @@ group= "k4unl.minecraft.sip" // http://maven.apache.org/guides/mini/guide-naming
 archivesBaseName = "ServerInfoProvider"
 
 
+allprojects {
+    apply plugin: 'java'
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
 
 minecraft {
     version = "${project.ext.mcVersion}-10.13.4.1448-1.7.10"

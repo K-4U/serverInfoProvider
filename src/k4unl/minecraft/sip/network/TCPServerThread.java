@@ -52,31 +52,28 @@ public class TCPServerThread implements Runnable {
                 if (serverSocket == null) {
                     break;
                 }
-                Socket connectionSocket = serverSocket.accept();
-                threadPoolExecutor.submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            connectionSocket.setSoTimeout(5000);
-                            
-                            Log.info("New connection from " + connectionSocket.getRemoteSocketAddress().toString());
-                            
-                            BufferedReader inFromClient =
-                                    new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
-                            DataOutputStream outToClient = new DataOutputStream(connectionSocket.getOutputStream());
-                            
-                            String msg = inFromClient.readLine();
-                            
-                            //Handle message:
-                            String retMsg = handleMessage(msg);
-                            Log.debug("SEND: " + retMsg);
-                            
-                            outToClient.writeBytes(retMsg);
-                            //And close the connection:
-                            connectionSocket.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                final Socket connectionSocket = serverSocket.accept();
+                threadPoolExecutor.submit(() -> {
+                    try {
+                        connectionSocket.setSoTimeout(5000);
+                        
+                        Log.info("New connection from " + connectionSocket.getRemoteSocketAddress().toString());
+                        
+                        BufferedReader inFromClient =
+                                new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
+                        DataOutputStream outToClient = new DataOutputStream(connectionSocket.getOutputStream());
+                        
+                        String msg = inFromClient.readLine();
+                        
+                        //Handle message:
+                        String retMsg = handleMessage(msg);
+                        Log.debug("SEND: " + retMsg);
+                        
+                        outToClient.writeBytes(retMsg);
+                        //And close the connection:
+                        connectionSocket.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 });
                 

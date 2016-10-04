@@ -5,12 +5,10 @@ import com.google.gson.GsonBuilder;
 import k4unl.minecraft.k4lib.network.EnumSIPValues;
 import k4unl.minecraft.sip.storage.Players;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.network.rcon.RConOutputStream;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -75,8 +73,8 @@ public class Values {
             theMap.put(key, value);
         }
     }
-
-    public static void writeToOutputStream(RConOutputStream outputStream, List<ValuePair> valueList){
+   
+    public static String writeToOutputStream(List<ValuePair> valueList) {
         Map<String, Object> endMap = new HashMap<String, Object>();
 
         for(ValuePair value : valueList) {
@@ -124,16 +122,16 @@ public class Values {
         GsonBuilder builder = new GsonBuilder();
         builder = builder.setPrettyPrinting();
         Gson gson = builder.create();
-        String endString = gson.toJson(endMap);
-
-        Log.debug(endString);
-
+        String endString = "";
         try {
-            outputStream.writeString(endString);
-        } catch (IOException e) {
+            endString = gson.toJson(endMap);
+        } catch (Exception e){
             e.printStackTrace();
+            endString = "{'error': 'INVALID JSON, ERROR ON SERVER'}";
         }
+        return endString;
     }
+    
 
     private static Map<String, String> getLatestDeaths(List<String> players) {
         Map<String, String> ret = new HashMap<String, String>();

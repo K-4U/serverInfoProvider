@@ -3,10 +3,7 @@ package k4unl.minecraft.sip;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.SidedProxy;
-import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLPostInitializationEvent;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.event.FMLServerStartingEvent;
+import cpw.mods.fml.common.event.*;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import k4unl.minecraft.k4lib.lib.config.ConfigHandler;
@@ -45,7 +42,7 @@ public class ServerInfoProvider {
 
         if(event.getSide().equals(cpw.mods.fml.relauncher.Side.CLIENT)){
             canWork = false;
-            Log.error("SQE IS A SERVER ONLY MOD! IT WILL NOT WORK ON CLIENTS!");
+            Log.error("SIP IS A SERVER ONLY MOD! IT WILL NOT WORK ON CLIENTS!");
         }else {
             SIPConfig.INSTANCE.init();
             SQEConfigHandler.init(SIPConfig.INSTANCE, event.getSuggestedConfigurationFile());
@@ -68,4 +65,12 @@ public class ServerInfoProvider {
         Players.loadPlayers();
         proxy.serverStarted(event);
     }
+    
+    @Mod.EventHandler
+    @SideOnly(Side.SERVER)
+    public void onServerStop(FMLServerStoppingEvent event) {
+        Players.savePlayers();
+        proxy.serverStopping(event);
+    }
 }
+

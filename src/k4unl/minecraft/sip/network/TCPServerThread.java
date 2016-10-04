@@ -25,10 +25,15 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 public class TCPServerThread implements Runnable {
     
+    private static int port;
     private static ServerSocket serverSocket;
     private static boolean keepRunning = true;
     
     public static final ThreadPoolExecutor threadPoolExecutor = new ScheduledThreadPoolExecutor(5, (new ThreadFactoryBuilder()).setNameFormat("Listener #%d").setDaemon(true).build());
+    
+    static {
+        port = SIPConfig.INSTANCE.getInt("port");
+    }
     
     @Override
     public void run() {
@@ -134,5 +139,9 @@ public class TCPServerThread implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    
+    public static int getPort(){
+        return port;
     }
 }

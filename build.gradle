@@ -31,7 +31,7 @@ project.ext {
     mcVersion="1.10.2"
 }
 
-version = project.ext.mcVersion + "-1.0." + project.ext.buildNum
+version = project.ext.mcVersion + "-2.0." + project.ext.buildNum
 group= "k4unl.minecraft.sip" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "ServerInfoProvider"
 

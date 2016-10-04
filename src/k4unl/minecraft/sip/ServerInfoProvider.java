@@ -9,10 +9,7 @@ import k4unl.minecraft.sip.proxy.CommonProxy;
 import k4unl.minecraft.sip.storage.Players;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.event.*;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -44,7 +41,7 @@ public class ServerInfoProvider {
 
         if(event.getSide().equals(Side.CLIENT)){
             canWork = false;
-            Log.error("SQE IS A SERVER ONLY MOD! IT WILL NOT WORK ON CLIENTS!");
+            Log.error("SIP IS A SERVER ONLY MOD! IT WILL NOT WORK ON CLIENTS!");
         }else {
             SIPConfig.INSTANCE.init();
             SQEConfigHandler.init(SIPConfig.INSTANCE, event.getSuggestedConfigurationFile());
@@ -67,4 +64,12 @@ public class ServerInfoProvider {
         Players.loadPlayers();
         proxy.serverStarted(event);
     }
+    
+    @Mod.EventHandler
+    @SideOnly(Side.SERVER)
+    public void onServerStop(FMLServerStoppingEvent event) {
+        Players.savePlayers();
+        proxy.serverStopping(event);
+    }
 }
+

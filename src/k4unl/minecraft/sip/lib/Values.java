@@ -12,7 +12,6 @@ import net.minecraft.block.properties.*;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.rcon.RConOutputStream;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
@@ -137,7 +136,7 @@ public class Values {
         }
     }
     
-    public static void writeToOutputStream(RConOutputStream outputStream, List<ValuePair> valueList) {
+    public static String writeToOutputStream(List<ValuePair> valueList) {
         
         Map<String, Object> endMap = new HashMap<String, Object>();
         List<Object> blockInfoMap = new ArrayList<>();
@@ -238,14 +237,15 @@ public class Values {
         GsonBuilder builder = new GsonBuilder();
         builder = builder.setPrettyPrinting();
         Gson gson = builder.create();
+        String endString = "";
         try {
-            String endString = gson.toJson(endMap);
-            
-            outputStream.writeString(endString);
+            endString = gson.toJson(endMap);
         } catch (Exception e){
             e.printStackTrace();
+            endString = "{'error': 'INVALID JSON, ERROR ON SERVER'}";
         }
         
+        return endString;
     }
     
     private static Map<String, Object> getInventoryInfo(Location loc, EnumFacing side) {

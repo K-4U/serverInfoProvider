@@ -103,7 +103,7 @@ Note that this list is not yet complete and i aim to add more stuff to it!
 
 
 ### API ###
-There is a limited API right now. Implement the [`ISIPEntity`](https://github.com/K-4U/serverInfoProvider/blob/master/src/k4unl/minecraft/sip/api/ISIPEntity.java) on a TileEntity.
+There is a limited API right now. Implement the [`ISIPEntity`](https://github.com/K-4U/serverInfoProvider/blob/1.10/src/k4unl/minecraft/sip/api/ISIPEntity.java) on a TileEntity.
 Whenever blockinfo is called on that Tile Entity, you can return a small map with keys and values to return to the requester, with info about your block.
 
 

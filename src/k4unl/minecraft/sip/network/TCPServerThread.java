@@ -1,5 +1,6 @@
 package k4unl.minecraft.sip.network;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.internal.LinkedTreeMap;
@@ -16,6 +17,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * @author Koen Beckers (K-4U)
@@ -24,6 +27,8 @@ public class TCPServerThread implements Runnable {
     
     private static ServerSocket serverSocket;
     private static boolean keepRunning = true;
+    
+    public static final ThreadPoolExecutor threadPoolExecutor = new ScheduledThreadPoolExecutor(5, (new ThreadFactoryBuilder()).setNameFormat("Listener #%d").setDaemon(true).build());
     
     @Override
     public void run() {
@@ -43,30 +48,39 @@ public class TCPServerThread implements Runnable {
                     break;
                 }
                 Socket connectionSocket = serverSocket.accept();
-                connectionSocket.setSoTimeout(5000);
-                Log.info("New connection from " + connectionSocket.getRemoteSocketAddress().toString());
-                //Log.info("Getting inputstream");
+                threadPoolExecutor.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            connectionSocket.setSoTimeout(5000);
+                            
+                            Log.info("New connection from " + connectionSocket.getRemoteSocketAddress().toString());
+                            
+                            BufferedReader inFromClient =
+                                    new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
+                            DataOutputStream outToClient = new DataOutputStream(connectionSocket.getOutputStream());
+                            
+                            String msg = inFromClient.readLine();
+                            
+                            //Handle message:
+                            String retMsg = handleMessage(msg);
+                            Log.debug("SEND: " + retMsg);
+                            
+                            outToClient.writeBytes(retMsg);
+                            //And close the connection:
+                            connectionSocket.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
                 
-                BufferedReader inFromClient =
-                        new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
-                DataOutputStream outToClient = new DataOutputStream(connectionSocket.getOutputStream());
-                
-                
-                while (!inFromClient.ready()) ;
-                String msg = inFromClient.readLine();
-                
-                //Handle message:
-                String retMsg = handleMessage(msg);
-                Log.debug("SEND: " + retMsg);
-                
-                outToClient.writeBytes(retMsg);
-                //And close the connection:
-                connectionSocket.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
+    
     
     /**
      * Handles a raw string and returns the stuff to re-send

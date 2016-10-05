@@ -96,3 +96,54 @@ jar {
     classifier = "universal"
 }
 
+
+task apiJar(type: Jar) {
+    from(sourceSets.main.output) {
+        include 'k4unl/minecraft/sip/api/**'
+
+        classifier = "api"
+    }
+}
+
+apiJar.mustRunAfter deobfJar
+
+
+artifacts {
+    archives deobfJar
+    archives apiJar
+}
+
+task("uploadJars", dependsOn: "reobf") {
+    description = "uploads JARs"
+    if (System.getenv("local_maven") != null) {
+        apply plugin: 'maven'
+        uploadArchives {
+            repositories {
+                mavenDeployer {
+                    repository(url: "file://" + System.getenv("local_maven"))
+                    pom {
+                        groupId = project.group
+                        version = project.version
+                        artifactId = project.archivesBaseName
+                        project {
+                            name project.archivesBaseName
+                            packaging 'jar'
+                            description 'ServerInfoProvider'
+                            issueManagement {
+                                system 'github'
+                                url 'https://github.com/K-4U/ServerInfoProvider/issues'
+                            }
+                            developers {
+                                developer {
+                                    id 'K4Unl'
+                                    name 'K4Unl'
+                                    roles { role 'developer' }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

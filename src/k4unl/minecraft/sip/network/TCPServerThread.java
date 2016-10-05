@@ -6,6 +6,7 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.internal.LinkedTreeMap;
 import k4unl.minecraft.k4lib.network.EnumSIPValues;
 import k4unl.minecraft.sip.lib.Log;
+import k4unl.minecraft.sip.lib.SIPRequest;
 import k4unl.minecraft.sip.lib.Values;
 import k4unl.minecraft.sip.lib.config.SIPConfig;
 
@@ -92,7 +93,7 @@ public class TCPServerThread implements Runnable {
      */
     private static String handleMessage(String message) {
         //See if this works:
-        List<Values.ValuePair> valuesRequested = new ArrayList<>();
+        List<SIPRequest> valuesRequested = new ArrayList<>();
         
         Log.debug("RECV: " + message);
         Gson nGson = new Gson();
@@ -101,26 +102,21 @@ public class TCPServerThread implements Runnable {
             if (jsonList != null) {
                 for (Object jsonObject : jsonList) {
                     if (jsonObject instanceof String) {
-                        EnumSIPValues key = EnumSIPValues.fromString(jsonObject.toString());
-                        if (key == EnumSIPValues.INVALID) {
-                            valuesRequested.add(new Values.ValuePair(key, jsonObject.toString()));
-                        } else {
-                            valuesRequested.add(new Values.ValuePair(key, null));
-                        }
+                        valuesRequested.add(new SIPRequest(jsonObject.toString(), null));
                         
                     } else if (jsonObject instanceof LinkedTreeMap) {
                         LinkedTreeMap jsonMap = (LinkedTreeMap) jsonObject;
                         if (jsonMap.containsKey("key") && jsonMap.containsKey("args")) {
-                            EnumSIPValues key = EnumSIPValues.fromString(jsonMap.get("key").toString());
-                            valuesRequested.add(new Values.ValuePair(key, jsonMap.get("args")));
+                            String key = jsonMap.get("key").toString();
+                            valuesRequested.add(new SIPRequest(key, jsonMap.get("args")));
                         }
                     }
                 }
             } else {
-                valuesRequested.add(new Values.ValuePair(EnumSIPValues.MISFORMED, 0));
+                valuesRequested.add(new SIPRequest(EnumSIPValues.MISFORMED.toString(), 0));
             }
         } catch (JsonSyntaxException e) {
-            valuesRequested.add(new Values.ValuePair(EnumSIPValues.MISFORMED, 0));
+            valuesRequested.add(new SIPRequest(EnumSIPValues.MISFORMED.toString(), 0));
             Log.error(e.getMessage());
         }
         

@@ -3,11 +3,13 @@ package k4unl.minecraft.sip.lib;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import k4unl.minecraft.k4lib.network.EnumSIPValues;
+import k4unl.minecraft.sip.api.event.InfoEvent;
 import k4unl.minecraft.sip.storage.Players;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.MinecraftForge;
 
 import java.util.*;
 
@@ -17,53 +19,11 @@ import java.util.*;
 public class Values {
     private static Date startDate = (new Date());
 
-    public static class ValuePair {
-       
-        private EnumSIPValues value;
-        private Object        argument;
-        private String        invalid;
+    
+    
+    private static void putInMap(Map theMap, Object key, Object value) {
         
-        public ValuePair(EnumSIPValues value_, Object argument_) {
-            
-            value = value_;
-            argument = argument_;
-        }
-        
-        public ValuePair(EnumSIPValues value_, String invalid_) {
-            
-            value = value_;
-            invalid = invalid_;
-        }
-        
-        public EnumSIPValues getValue() {
-            
-            return value;
-        }
-
-        public String getArgument() {
-            if(argument != null) {
-                return argument.toString().toLowerCase();
-            }else{
-                return "";
-            }
-        }
-
-        public int getIntArgument() {
-            if (argument != null) {
-                return (int) (Math.floor((Double) argument));
-            }else{
-                return 0;
-            }
-        }
-
-
-        public String getInvalid() {
-            return invalid;
-        }
-    }
-
-    private static void putInMap(Map theMap, Object key, Object value){
-        if(theMap.containsKey(key)){
+        if (theMap.containsKey(key)) {
             //merge maps
             if(theMap.get(key) instanceof Map && value instanceof Map) {
                 ((Map) theMap.get(key)).putAll((Map) value);
@@ -73,36 +33,41 @@ public class Values {
             theMap.put(key, value);
         }
     }
-   
-    public static String writeToOutputStream(List<ValuePair> valueList) {
+    
+    public static String writeToOutputStream(List<SIPRequest> valueList) {
+        
         Map<String, Object> endMap = new HashMap<String, Object>();
-
-        for(ValuePair value : valueList) {
+        Map<String, List<Object>> infoMap = new HashMap<>();
+        
+        for (SIPRequest value : valueList) {
             Object ret = null;
-            switch (value.getValue()) {
+            
+            boolean doNotAddToMap = false;
+            EnumSIPValues v = EnumSIPValues.fromString(value.getKey());
+            
+            switch (v) {
                 case TIME:
                     ret = getWorldTime(value.getIntArgument());
+                    doNotAddToMap = true;
                     break;
                 case PLAYERS:
                     ret = getPlayers();
                     if(value.getArgument().equals("latestdeath")){
                         ret = getLatestDeaths((List<String>) ret);
                     }
+                    doNotAddToMap = true;
                     break;
                 case DAYNIGHT:
                     ret = getWorldDayNight(value.getIntArgument());
+                    doNotAddToMap = true;
                     break;
                 case DIMENSIONS:
                     ret = getDimensions();
+                    doNotAddToMap = true;
                     break;
                 case UPTIME:
                     ret = getUptime();
-                    break;
-                case INVALID:
-                    ret = null;
-                    break;
-                case MISFORMED:
-                    ret = "MISFORMED JSON";
+                    doNotAddToMap = true;
                     break;
                 case DEATHS:
                     //Get a leaderboard of deaths, or the deaths of a player
@@ -111,28 +76,53 @@ public class Values {
                     }else{
                         ret = getDeathLeaderboard();
                     }
-
+                    doNotAddToMap = true;
+                    
                     break;
                 case WEATHER:
                     ret = getWorldWeather(value.getIntArgument());
+                    doNotAddToMap = true;
                     break;
+
             }
-            putInMap(endMap, value.getValue().toString(), ret);
+            
+            if(ret == null){
+                //If nothing has been returned on our side, that means we don't know it.
+                //Thus, ask the rest of the mods:
+                InfoEvent evt = new InfoEvent(value);
+                MinecraftForge.EVENT_BUS.post(evt);
+    
+                ret = evt.getReturn();
+            }
+            
+            
+            if (doNotAddToMap) {
+                putInMap(endMap, value.getKey(), ret);
+            } else {
+                if(!infoMap.containsKey(value.getKey())){
+                    infoMap.put(value.getKey(), new ArrayList<>());
+                }
+                infoMap.get(value.getKey()).add(ret);
+            }
         }
+        
+        for(Map.Entry<String, List<Object>> obj : infoMap.entrySet()){
+            putInMap(endMap, obj.getKey(), obj.getValue());
+        }
+
         GsonBuilder builder = new GsonBuilder();
         builder = builder.setPrettyPrinting();
         Gson gson = builder.create();
-        String endString = "";
+        String endString;
         try {
             endString = gson.toJson(endMap);
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             endString = "{'error': 'INVALID JSON, ERROR ON SERVER'}";
         }
         return endString;
     }
     
-
     private static Map<String, String> getLatestDeaths(List<String> players) {
         Map<String, String> ret = new HashMap<String, String>();
         for(String p : players){

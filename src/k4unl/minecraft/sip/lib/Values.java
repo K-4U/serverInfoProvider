@@ -179,6 +179,7 @@ public class Values {
         Map<String, Object> ret = new HashMap<>();
         IBlockState state = loc.getBlockState(getWorldServerForDimensionId(loc.getDimension()));
         ret.put("unlocalized-name", state.getBlock().getUnlocalizedName());
+        ret.put("localized-name", state.getBlock().getLocalizedName());
         ret.put("coords", loc);
         
         
@@ -193,11 +194,14 @@ public class Values {
                 ItemStack itemStack = cap.getStackInSlot(i);
                 if (itemStack != null) {
                     itemMap.put("unlocalized-name", itemStack.getUnlocalizedName());
+                    itemMap.put("localized-name", itemStack.getDisplayName());
                     itemMap.put("stacksize", itemStack.stackSize);
                     itemMap.put("metadata", itemStack.getMetadata());
                     itemMap.put("damage", itemStack.getItemDamage());
                     itemMap.put("maxdamage", itemStack.getMaxDamage());
                     itemMap.put("enchantments", itemStack.getEnchantmentTagList());
+                    
+                    //TODO: Add capabilities
                 } else {
                     itemMap.put("unlocalized-name", "empty");
                 }
@@ -234,6 +238,7 @@ public class Values {
         
         IBlockState state = loc.getBlockState(getWorldServerForDimensionId(loc.getDimension()));
         ret.put("unlocalized-name", state.getBlock().getUnlocalizedName());
+        ret.put("localized-name", state.getBlock().getLocalizedName());
         ret.put("coords", loc);
         Map<String, Map<String, Object>> properties = new HashMap<>();
         for (Map.Entry<IProperty<?>, Comparable<?>> entry : state.getProperties().entrySet()) {
@@ -278,6 +283,7 @@ public class Values {
         Map<String, Object> ret = new HashMap<>();
         IBlockState state = loc.getBlockState(getWorldServerForDimensionId(loc.getDimension()));
         ret.put("unlocalized-name", state.getBlock().getUnlocalizedName());
+        ret.put("localized-name", state.getBlock().getLocalizedName());
         ret.put("coords", loc);
         
         //TODO: Figure out why this gives an NPE
@@ -290,7 +296,8 @@ public class Values {
                 FluidStack fluid = tankProperties.getContents();
                 if (fluid != null) {
                     ret.put("level", fluid.amount);
-                    ret.put("fluid", fluid.getUnlocalizedName());
+                    ret.put("unlocalized-name", fluid.getUnlocalizedName());
+                    ret.put("localized-name", fluid.getLocalizedName());
                 } else {
                     ret.put("level", 0);
                     ret.put("fluid", "none");

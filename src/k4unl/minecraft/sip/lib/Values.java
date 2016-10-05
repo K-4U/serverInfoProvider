@@ -2,11 +2,10 @@ package k4unl.minecraft.sip.lib;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
-import k4unl.minecraft.k4lib.lib.Functions;
-import k4unl.minecraft.k4lib.lib.Location;
+import k4unl.minecraft.k4lib.lib.*;
 import k4unl.minecraft.k4lib.network.EnumSIPValues;
 import k4unl.minecraft.sip.api.ISIPEntity;
+import k4unl.minecraft.sip.api.event.InfoEvent;
 import k4unl.minecraft.sip.storage.Players;
 import net.minecraft.block.properties.*;
 import net.minecraft.block.state.IBlockState;
@@ -16,6 +15,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -32,96 +32,6 @@ public class Values {
     
     private static Date startDate = (new Date());
     
-    public static class ValuePair {
-        
-        private EnumSIPValues value;
-        private Object        argument;
-        private String        invalid;
-        
-        public ValuePair(EnumSIPValues value_, Object argument_) {
-            
-            value = value_;
-            argument = argument_;
-        }
-        
-        public ValuePair(EnumSIPValues value_, String invalid_) {
-            
-            value = value_;
-            invalid = invalid_;
-        }
-        
-        public EnumSIPValues getValue() {
-            
-            return value;
-        }
-        
-        public String getArgument() {
-            
-            if (argument != null) {
-                return argument.toString().toLowerCase();
-            } else {
-                return "";
-            }
-        }
-        
-        public int getIntArgument() {
-            
-            if (argument != null) {
-                return (int) (Math.floor((Double) argument));
-            } else {
-                return 0;
-            }
-        }
-        
-        public Location getPosArgument() {
-            
-            if (argument != null) {
-                Gson nGson = new Gson();
-                try {
-                    return nGson.fromJson(getArgument(), Location.class);
-                } catch (JsonSyntaxException e) {
-                    return null;
-                }
-            } else {
-                return null;
-            }
-        }
-        
-        public EnumFacing getSideArgument() {
-            
-            if (argument != null) {
-                Gson nGson = new Gson();
-                try {
-                    Map<String, Object> arg = nGson.fromJson(getArgument(), Map.class);
-                    if (arg.containsKey("side")) {
-                        return EnumFacing.byName((String) arg.get("side"));
-                    } else {
-                        return null;
-                    }
-                } catch (JsonSyntaxException e) {
-                    return null;
-                }
-            } else {
-                return null;
-            }
-        }
-        
-        public boolean isArgumentPos() {
-            
-            return getPosArgument() != null;
-        }
-        
-        public boolean hasArgumentSide() {
-            
-            return getSideArgument() != null;
-        }
-        
-        
-        public String getInvalid() {
-            
-            return invalid;
-        }
-    }
     
     private static void putInMap(Map theMap, Object key, Object value) {
         
@@ -136,39 +46,40 @@ public class Values {
         }
     }
     
-    public static String writeToOutputStream(List<ValuePair> valueList) {
+    public static String writeToOutputStream(List<SIPRequest> valueList) {
         
         Map<String, Object> endMap = new HashMap<String, Object>();
-        List<Object> blockInfoMap = new ArrayList<>();
-        List<Object> RFInfoMap = new ArrayList<>();
-        List<Object> fluidInfoMap = new ArrayList<>();
+        Map<String, List<Object>> infoMap = new HashMap<>();
         
-        for (ValuePair value : valueList) {
+        for (SIPRequest value : valueList) {
             Object ret = null;
-            switch (value.getValue()) {
+            
+            boolean doNotAddToMap = false;
+            EnumSIPValues v = EnumSIPValues.fromString(value.getKey());
+            
+            switch (v) {
                 case TIME:
                     ret = getWorldTime(value.getIntArgument());
+                    doNotAddToMap = true;
                     break;
                 case PLAYERS:
                     ret = getPlayers();
                     if (value.getArgument().equals("latestdeath")) {
                         ret = getLatestDeaths((List<String>) ret);
                     }
+                    doNotAddToMap = true;
                     break;
                 case DAYNIGHT:
                     ret = getWorldDayNight(value.getIntArgument());
+                    doNotAddToMap = true;
                     break;
                 case DIMENSIONS:
                     ret = getDimensions();
+                    doNotAddToMap = true;
                     break;
                 case UPTIME:
                     ret = getUptime();
-                    break;
-                case INVALID:
-                    ret = null;
-                    break;
-                case MISFORMED:
-                    ret = "MISFORMED JSON";
+                    doNotAddToMap = true;
                     break;
                 case DEATHS:
                     //Get a leaderboard of deaths, or the deaths of a player
@@ -177,10 +88,12 @@ public class Values {
                     } else {
                         ret = getDeathLeaderboard();
                     }
+                    doNotAddToMap = true;
                     
                     break;
                 case WEATHER:
                     ret = getWorldWeather(value.getIntArgument());
+                    doNotAddToMap = true;
                     break;
                 
                 case BLOCKINFO:
@@ -210,37 +123,49 @@ public class Values {
                     break;
                 
                 case INVENTORY:
-                    if (value.isArgumentPos() && value.hasArgumentSide()){
+                    if (value.isArgumentPos() && value.hasArgumentSide()) {
                         ret = getInventoryInfo(value.getPosArgument(), value.getSideArgument());
                     } else if (!value.isArgumentPos()) {
                         ret = "No position argument";
                     } else {
                         ret = "No side argument";
                     }
+                    break;
+                case INVALID:
+                    break;
             }
-            if (value.getValue().equals(EnumSIPValues.BLOCKINFO)) {
-                blockInfoMap.add(ret);
-            } else if (value.getValue().equals(EnumSIPValues.FLUID)) {
-                fluidInfoMap.add(ret);
-            } else if (value.getValue().equals(EnumSIPValues.RF)) {
-                RFInfoMap.add(ret);
+            
+            if(ret == null){
+                //If nothing has been returned on our side, that means we don't know it.
+                //Thus, ask the rest of the mods:
+                InfoEvent evt = new InfoEvent(value);
+                MinecraftForge.EVENT_BUS.post(evt);
+    
+                ret = evt.getReturn();
+            }
+            
+            
+            if (doNotAddToMap) {
+                putInMap(endMap, value.getKey(), ret);
             } else {
-                putInMap(endMap, value.getValue().toString(), ret);
+                if(!infoMap.containsKey(value.getKey())){
+                    infoMap.put(value.getKey(), new ArrayList<>());
+                }
+                infoMap.get(value.getKey()).add(ret);
             }
         }
-        
-        
-        if (blockInfoMap.size() > 0) putInMap(endMap, EnumSIPValues.BLOCKINFO.toString(), blockInfoMap);
-        if (fluidInfoMap.size() > 0) putInMap(endMap, EnumSIPValues.FLUID.toString(), fluidInfoMap);
-        if (RFInfoMap.size() > 0) putInMap(endMap, EnumSIPValues.RF.toString(), RFInfoMap);
+    
+        for(Map.Entry<String, List<Object>> obj : infoMap.entrySet()){
+            putInMap(endMap, obj.getKey(), obj.getValue());
+        }
         
         GsonBuilder builder = new GsonBuilder();
         builder = builder.setPrettyPrinting();
         Gson gson = builder.create();
-        String endString = "";
+        String endString;
         try {
             endString = gson.toJson(endMap);
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             endString = "{'error': 'INVALID JSON, ERROR ON SERVER'}";
         }
@@ -249,13 +174,13 @@ public class Values {
     }
     
     private static Map<String, Object> getInventoryInfo(Location loc, EnumFacing side) {
-    
+        
         //Return a single Key-Value pair of strings.
         Map<String, Object> ret = new HashMap<>();
         IBlockState state = loc.getBlockState(getWorldServerForDimensionId(loc.getDimension()));
         ret.put("unlocalized-name", state.getBlock().getUnlocalizedName());
         ret.put("coords", loc);
-    
+        
         
         TileEntity tileEntity = loc.getTE(getWorldServerForDimensionId(loc.getDimension()));
         if (tileEntity.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, side)) {
@@ -263,17 +188,17 @@ public class Values {
             int maxSlots = cap.getSlots();
             
             List<Map<String, Object>> items = new ArrayList<>();
-            for(int i = 0; i < maxSlots; i++){
+            for (int i = 0; i < maxSlots; i++) {
                 Map<String, Object> itemMap = new HashMap<>();
                 ItemStack itemStack = cap.getStackInSlot(i);
-                if(itemStack != null) {
+                if (itemStack != null) {
                     itemMap.put("unlocalized-name", itemStack.getUnlocalizedName());
                     itemMap.put("stacksize", itemStack.stackSize);
                     itemMap.put("metadata", itemStack.getMetadata());
                     itemMap.put("damage", itemStack.getItemDamage());
                     itemMap.put("maxdamage", itemStack.getMaxDamage());
                     itemMap.put("enchantments", itemStack.getEnchantmentTagList());
-                }else{
+                } else {
                     itemMap.put("unlocalized-name", "empty");
                 }
                 items.add(i, itemMap);
@@ -282,7 +207,7 @@ public class Values {
         } else {
             ret.put("error", "No inventory at these coordinates");
         }
-    
+        
         return ret;
     }
     
@@ -344,7 +269,7 @@ public class Values {
     }
     
     private static Map<String, Object> getRFInfo(Location loc) {
-        
+        //TODO
         return null;
     }
     

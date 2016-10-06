@@ -1,8 +1,10 @@
 package k4unl.minecraft.sip.lib;
 
+import cofh.api.energy.IEnergyHandler;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import k4unl.minecraft.k4lib.lib.*;
+import k4unl.minecraft.k4lib.lib.Functions;
+import k4unl.minecraft.k4lib.lib.Location;
 import k4unl.minecraft.k4lib.network.EnumSIPValues;
 import k4unl.minecraft.sip.api.ISIPEntity;
 import k4unl.minecraft.sip.api.event.InfoEvent;
@@ -105,10 +107,12 @@ public class Values {
                     break;
                 
                 case RF:
-                    if (value.isArgumentPos()) {
-                        ret = getRFInfo(value.getPosArgument());
-                    } else {
+                    if (value.isArgumentPos() && value.hasArgumentSide()) {
+                        ret = getRFInfo(value.getPosArgument(), value.getSideArgument());
+                    } else if (!value.isArgumentPos()) {
                         ret = "No position argument";
+                    } else {
+                        ret = "No side argument";
                     }
                     break;
                 
@@ -135,12 +139,12 @@ public class Values {
                     break;
             }
             
-            if(ret == null){
+            if (ret == null) {
                 //If nothing has been returned on our side, that means we don't know it.
                 //Thus, ask the rest of the mods:
                 InfoEvent evt = new InfoEvent(value);
                 MinecraftForge.EVENT_BUS.post(evt);
-    
+                
                 ret = evt.getReturn();
             }
             
@@ -148,14 +152,14 @@ public class Values {
             if (doNotAddToMap) {
                 putInMap(endMap, value.getKey(), ret);
             } else {
-                if(!infoMap.containsKey(value.getKey())){
+                if (!infoMap.containsKey(value.getKey())) {
                     infoMap.put(value.getKey(), new ArrayList<>());
                 }
                 infoMap.get(value.getKey()).add(ret);
             }
         }
-    
-        for(Map.Entry<String, List<Object>> obj : infoMap.entrySet()){
+        
+        for (Map.Entry<String, List<Object>> obj : infoMap.entrySet()) {
             putInMap(endMap, obj.getKey(), obj.getValue());
         }
         
@@ -201,7 +205,8 @@ public class Values {
                     itemMap.put("maxdamage", itemStack.getMaxDamage());
                     itemMap.put("enchantments", itemStack.getEnchantmentTagList());
                     
-                    //TODO: Add capabilities
+                    //TODO: Add capabilities?
+                    
                 } else {
                     itemMap.put("unlocalized-name", "empty");
                 }
@@ -268,14 +273,27 @@ public class Values {
             properties.put(iproperty.getName(), propertyData);
         }
         
+        
         ret.put("state", properties);
         
         return ret;
     }
     
-    private static Map<String, Object> getRFInfo(Location loc) {
-        //TODO
-        return null;
+    private static Map<String, Object> getRFInfo(Location loc, EnumFacing side) {
+        //Return a single Key-Value pair of strings.
+        Map<String, Object> ret = new HashMap<>();
+        IBlockState state = loc.getBlockState(getWorldServerForDimensionId(loc.getDimension()));
+        ret.put("unlocalized-name", state.getBlock().getUnlocalizedName());
+        ret.put("localized-name", state.getBlock().getLocalizedName());
+        ret.put("coords", loc);
+        
+        TileEntity tileEntity = loc.getTE(getWorldServerForDimensionId(loc.getDimension()));
+        if (tileEntity instanceof IEnergyHandler) {
+            ret.put("stored", ((IEnergyHandler) tileEntity).getEnergyStored(side));
+            ret.put("max", ((IEnergyHandler) tileEntity).getMaxEnergyStored(side));
+        }
+        
+        return ret;
     }
     
     private static Map<String, Object> getFluidInfo(Location loc, EnumFacing side) {
@@ -286,7 +304,6 @@ public class Values {
         ret.put("localized-name", state.getBlock().getLocalizedName());
         ret.put("coords", loc);
         
-        //TODO: Figure out why this gives an NPE
         TileEntity tileEntity = loc.getTE(getWorldServerForDimensionId(loc.getDimension()));
         if (tileEntity.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, side)) {
             IFluidHandler cap = tileEntity.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, side);

@@ -48,7 +48,7 @@ If we send the top json to the server, we would get a return message:
 
 	{
 		"TIME": {
-			"1": "13:37"
+			"0": "13:37"
 		}
 	}
 
@@ -69,6 +69,8 @@ These are the variables that can be requested, along with arguments:
 - deaths - If used without argument, this will return all the players who have died more than once
 	- playername - Returns a list of all the deaths this played had since the mod was installed.
 - weather - Gives the weather. Argument is optional
+    - Dimension id
+- tps - Gives the TPS and tick time of a dimension. Argument is optional
     - Dimension id
 
 #### Position based variables ###
@@ -160,3 +162,10 @@ Usage:
 	    if not data: break
 
 
+
+There is also a PHP version available. This does NOT include the automatic port search yet.
+Here's an example of how it looks:
+![](http://ss.k-4u.nl/2016/10/2016-10-08_22-23-46.png)
+
+Link to this code: [https://github.com/K-4U/SIP-web](https://github.com/K-4U/SIP-web).
+This is ofcourse only an example.

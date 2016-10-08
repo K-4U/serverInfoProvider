@@ -27,7 +27,7 @@ repositories {
 
 
 dependencies {
-    compile "k4unl:k4lib:1.10.2-1.0.64:deobf"
+    compile "k4unl:k4lib:1.10.2-1.0.66:deobf"
     compile "net.industrial-craft:industrialcraft-2:2.6.84-ex110:api"
 }
 

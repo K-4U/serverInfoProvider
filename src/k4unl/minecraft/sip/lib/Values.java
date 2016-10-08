@@ -17,6 +17,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
@@ -126,6 +127,16 @@ public class Values {
                     } else {
                         ret = "No side argument";
                     }
+                    break;
+                case TPS:
+                    if (value.getArgument().equals("")) {
+                        //No dimension given
+                        ret = getTPS();
+                    } else {
+                        //Dimension given
+                        ret = getTPS(value.getIntArgument());
+                    }
+                    doNotAddToMap = true;
                     break;
                 case INVALID:
                     break;
@@ -355,6 +366,39 @@ public class Values {
         } else {
             return getMap(dimensionId, "NaW");
         }
+    }
+    
+    private static Map<Integer, Map<String, Double>> getTPS() {
+        
+        Map<Integer, Map<String, Double>> ret = new HashMap<>();
+        
+        for (Integer dimId : DimensionManager.getIDs()) {
+            ret.put(dimId, getTPS(dimId));
+        }
+        
+        return ret;
+    }
+    
+    private static Map<String, Double> getTPS(int dimensionId) {
+        
+        Map<String, Double> ret = new HashMap<>();
+        
+        double worldTickTime = mean(Functions.getServer().worldTickTimes.get(dimensionId)) * 1.0E-6D;
+        double worldTPS = Math.min(1000.0 / worldTickTime, 20);
+        ret.put("ticktime", worldTickTime);
+        ret.put("tps", worldTPS);
+        
+        return ret;
+    }
+    
+    private static long mean(long[] values) {
+        
+        long sum = 0l;
+        for (long v : values) {
+            sum += v;
+        }
+        
+        return sum / values.length;
     }
     
     private static Long getUptime() {

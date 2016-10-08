@@ -2,6 +2,7 @@ package k4unl.minecraft.sip.lib;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import k4unl.minecraft.k4lib.lib.Functions;
 import k4unl.minecraft.k4lib.network.EnumSIPValues;
 import k4unl.minecraft.sip.api.event.InfoEvent;
 import k4unl.minecraft.sip.storage.Players;
@@ -9,6 +10,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
 
 import java.util.*;
@@ -83,7 +85,18 @@ public class Values {
                     ret = getWorldWeather(value.getIntArgument());
                     doNotAddToMap = true;
                     break;
-
+                case TPS:
+                    if (value.getArgument().equals("")) {
+                        //No dimension given
+                        ret = getTPS();
+                    } else {
+                        //Dimension given
+                        ret = getTPS(value.getIntArgument());
+                    }
+                    doNotAddToMap = true;
+                    break;
+                case INVALID:
+                    break;
             }
             
             if(ret == null){
@@ -171,8 +184,42 @@ public class Values {
             return getMap(dimensionId, "NaW");
         }
     }
-
-    private static Long getUptime(){
+    
+    private static Map<Integer, Map<String, Double>> getTPS() {
+        
+        Map<Integer, Map<String, Double>> ret = new HashMap<>();
+        
+        for (Integer dimId : DimensionManager.getIDs()) {
+            ret.put(dimId, getTPS(dimId));
+        }
+        
+        return ret;
+    }
+    
+    private static Map<String, Double> getTPS(int dimensionId) {
+        
+        Map<String, Double> ret = new HashMap<>();
+        
+        double worldTickTime = mean(Functions.getServer().worldTickTimes.get(dimensionId)) * 1.0E-6D;
+        double worldTPS = Math.min(1000.0 / worldTickTime, 20);
+        ret.put("ticktime", worldTickTime);
+        ret.put("tps", worldTPS);
+        
+        return ret;
+    }
+    
+    private static long mean(long[] values) {
+        
+        long sum = 0l;
+        for (long v : values) {
+            sum += v;
+        }
+        
+        return sum / values.length;
+    }
+    
+    private static Long getUptime() {
+        
         Date now = new Date();
         return now.getTime() - startDate.getTime();
     }

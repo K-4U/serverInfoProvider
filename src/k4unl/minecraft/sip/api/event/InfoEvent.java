@@ -9,7 +9,6 @@ import java.util.Map;
 /**
  * @author Koen Beckers (K-4U)
  */
-
 public class InfoEvent extends Event {
     
     private final ISIPRequest         request;
@@ -36,6 +35,10 @@ public class InfoEvent extends Event {
     public String getKey() {
         
         return request.getKey();
+    }
+    
+    public ISIPRequest getRequest(){
+        return request;
     }
     
     /**

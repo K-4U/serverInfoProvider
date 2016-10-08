@@ -1,6 +1,5 @@
 package k4unl.minecraft.sip.lib;
 
-import cofh.api.energy.IEnergyHandler;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import k4unl.minecraft.k4lib.lib.Functions;
@@ -15,6 +14,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.MinecraftForge;
@@ -26,6 +26,8 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
 import java.util.*;
+
+import static k4unl.minecraft.k4lib.lib.Functions.getWorldServerForDimensionId;
 
 /**
  * @author Koen Beckers (K-4U)
@@ -106,16 +108,6 @@ public class Values {
                     }
                     break;
                 
-                case RF:
-                    if (value.isArgumentPos() && value.hasArgumentSide()) {
-                        ret = getRFInfo(value.getPosArgument(), value.getSideArgument());
-                    } else if (!value.isArgumentPos()) {
-                        ret = "No position argument";
-                    } else {
-                        ret = "No side argument";
-                    }
-                    break;
-                
                 case FLUID:
                     if (value.isArgumentPos() && value.hasArgumentSide()) {
                         ret = getFluidInfo(value.getPosArgument(), value.getSideArgument());
@@ -143,6 +135,12 @@ public class Values {
                 //If nothing has been returned on our side, that means we don't know it.
                 //Thus, ask the rest of the mods:
                 InfoEvent evt = new InfoEvent(value);
+                if (value.isArgumentPos()) {
+                    IBlockState state = value.getPosArgument().getBlockState(Functions.getWorldServerForDimensionId(value.getPosArgument().getDimension()));
+                    evt.addInfo("unlocalized-name", state.getBlock().getUnlocalizedName());
+                    evt.addInfo("localized-name", I18n.translateToLocal(state.getBlock().getLocalizedName()));
+                    evt.addInfo("coords", value.getPosArgument());
+                }
                 MinecraftForge.EVENT_BUS.post(evt);
                 
                 ret = evt.getReturn();
@@ -183,7 +181,7 @@ public class Values {
         Map<String, Object> ret = new HashMap<>();
         IBlockState state = loc.getBlockState(getWorldServerForDimensionId(loc.getDimension()));
         ret.put("unlocalized-name", state.getBlock().getUnlocalizedName());
-        ret.put("localized-name", state.getBlock().getLocalizedName());
+        ret.put("localized-name", I18n.translateToLocal(state.getBlock().getLocalizedName()));
         ret.put("coords", loc);
         
         
@@ -243,7 +241,7 @@ public class Values {
         
         IBlockState state = loc.getBlockState(getWorldServerForDimensionId(loc.getDimension()));
         ret.put("unlocalized-name", state.getBlock().getUnlocalizedName());
-        ret.put("localized-name", state.getBlock().getLocalizedName());
+        ret.put("localized-name", I18n.translateToLocal(state.getBlock().getLocalizedName()));
         ret.put("coords", loc);
         Map<String, Map<String, Object>> properties = new HashMap<>();
         for (Map.Entry<IProperty<?>, Comparable<?>> entry : state.getProperties().entrySet()) {
@@ -279,29 +277,13 @@ public class Values {
         return ret;
     }
     
-    private static Map<String, Object> getRFInfo(Location loc, EnumFacing side) {
-        //Return a single Key-Value pair of strings.
-        Map<String, Object> ret = new HashMap<>();
-        IBlockState state = loc.getBlockState(getWorldServerForDimensionId(loc.getDimension()));
-        ret.put("unlocalized-name", state.getBlock().getUnlocalizedName());
-        ret.put("localized-name", state.getBlock().getLocalizedName());
-        ret.put("coords", loc);
-        
-        TileEntity tileEntity = loc.getTE(getWorldServerForDimensionId(loc.getDimension()));
-        if (tileEntity instanceof IEnergyHandler) {
-            ret.put("stored", ((IEnergyHandler) tileEntity).getEnergyStored(side));
-            ret.put("max", ((IEnergyHandler) tileEntity).getMaxEnergyStored(side));
-        }
-        
-        return ret;
-    }
     
     private static Map<String, Object> getFluidInfo(Location loc, EnumFacing side) {
         //Return a single Key-Value pair of strings.
         Map<String, Object> ret = new HashMap<>();
         IBlockState state = loc.getBlockState(getWorldServerForDimensionId(loc.getDimension()));
         ret.put("unlocalized-name", state.getBlock().getUnlocalizedName());
-        ret.put("localized-name", state.getBlock().getLocalizedName());
+        ret.put("localized-name", I18n.translateToLocal(state.getBlock().getLocalizedName()));
         ret.put("coords", loc);
         
         TileEntity tileEntity = loc.getTE(getWorldServerForDimensionId(loc.getDimension()));
@@ -312,11 +294,10 @@ public class Values {
             if (tankProperties != null) {
                 FluidStack fluid = tankProperties.getContents();
                 if (fluid != null) {
-                    ret.put("level", fluid.amount);
-                    ret.put("unlocalized-name", fluid.getUnlocalizedName());
-                    ret.put("localized-name", fluid.getLocalizedName());
+                    ret.put("stored", fluid.amount);
+                    ret.put("fluid", fluid.getUnlocalizedName());
                 } else {
-                    ret.put("level", 0);
+                    ret.put("stored", 0);
                     ret.put("fluid", "none");
                 }
                 ret.put("capacity", tankProperties.getCapacity());
@@ -348,16 +329,6 @@ public class Values {
             map.put(server.provider.getDimensionType().getName(), server.provider.getDimension());
         }
         return map;
-    }
-    
-    private static WorldServer getWorldServerForDimensionId(int dimensionId) {
-        
-        for (WorldServer server : Functions.getServer().worldServers) {
-            if (server.provider.getDimension() == dimensionId) {
-                return server;
-            }
-        }
-        return null;
     }
     
     private static List<String> getPlayers() {

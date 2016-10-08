@@ -79,12 +79,12 @@ These variables will return a list of values requested.
     - y
     - z
     - dimension
-- rf - Gives you basic RF information about a block in the world. Arguments required:
+- energy - Gives you basic energy information about a block in the world. Arguments required:
     - x
     - y
     - z
     - dimension
-    - side - The side of the block to fetch RF info from. (up/down/north/south/east/west)
+    - side - The side of the block to fetch RF info from. (up/down/north/south/east/west) (Not required for EU)
 - fluid - Gives you basic information about a tank in a block in the world. Arguments required:
     - x
     - y

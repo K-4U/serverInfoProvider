@@ -1,6 +1,7 @@
 package k4unl.minecraft.sip;
 
 import k4unl.minecraft.k4lib.lib.config.ConfigHandler;
+import k4unl.minecraft.sip.events.EnergyEvent;
 import k4unl.minecraft.sip.events.EventHelper;
 import k4unl.minecraft.sip.lib.Log;
 import k4unl.minecraft.sip.lib.config.ModInfo;
@@ -43,6 +44,7 @@ public class ServerInfoProvider {
             canWork = false;
             Log.error("SIP IS A SERVER ONLY MOD! IT WILL NOT WORK ON CLIENTS!");
         }else {
+            EnergyEvent.init();
             SIPConfig.INSTANCE.init();
             SQEConfigHandler.init(SIPConfig.INSTANCE, event.getSuggestedConfigurationFile());
         }
@@ -51,6 +53,7 @@ public class ServerInfoProvider {
     @Mod.EventHandler
     public void load(FMLInitializationEvent event) {
         EventHelper.init();
+        
     }
 
     @Mod.EventHandler

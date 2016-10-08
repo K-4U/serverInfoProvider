@@ -107,6 +107,10 @@ Note that this list is not yet complete and i aim to add more stuff to it!
 ### API ###
 There is a limited API right now. Implement the [`ISIPEntity`](https://github.com/K-4U/serverInfoProvider/blob/1.10/src/k4unl/minecraft/sip/api/ISIPEntity.java) on a TileEntity.
 Whenever blockinfo is called on that Tile Entity, you can return a small map with keys and values to return to the requester, with info about your block.
+There's also an event [`InfoEvent`](https://github.com/K-4U/serverInfoProvider/blob/1.10/src/k4unl/minecraft/sip/api/event/InfoEvent.java). This is triggered on the main Forge Event bus whenever a value gets requested.
+Use the `addInfo` method to add a return messsage to the client.
+
+If you have your own powersystem, the `energy` key is also transferred to this event, allowing you to add your own.
 
 
 ### Examples ###

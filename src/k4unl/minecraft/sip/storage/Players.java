@@ -64,6 +64,13 @@ public class Players {
         String endString = gson.toJson(playerList);
 
         String p = DimensionManager.getCurrentSaveRootDirectory().getAbsolutePath();
+
+        File d = new File(p + "/sip/");
+
+        if(!d.exists()){
+            d.mkdir();
+        }
+
         p += "/sip/players.json";
         File f = new File(p);
         if(!f.exists()){
@@ -92,9 +99,11 @@ public class Players {
         String p = DimensionManager.getCurrentSaveRootDirectory().getAbsolutePath();
 
         File d = new File(p + "/sip/");
+
         if(!d.exists()){
             d.mkdir();
         }
+
         p += "/sip/players.json";
         File f = new File(p);
         if(!f.exists()){

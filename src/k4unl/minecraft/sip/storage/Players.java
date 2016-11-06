@@ -101,7 +101,7 @@ public class Players {
         File d = new File(p + "/sip/");
 
         if(!d.exists()){
-            boolean b = d.mkdir();
+            d.mkdir();
         }
 
         p += "/sip/players.json";

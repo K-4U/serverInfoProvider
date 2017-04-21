@@ -25,18 +25,19 @@ repositories {
     }
 }
 
+project.ext {
+    buildNum = System.getenv("BUILD_NUMBER")
+    mcVersion="1.11.2"
+}
 
 dependencies {
-    compile "k4unl:k4lib:1.10.2-1.0.66:deobf"
+    deobfCompile "k4unl:k4lib:${project.ext.mcVersion}-2.1.70:universal"
     compile "net.industrial-craft:industrialcraft-2:2.6.84-ex110:api"
 }
 
-project.ext {
-    buildNum = System.getenv("BUILD_NUMBER")
-    mcVersion="1.10.2"
-}
 
-version = project.ext.mcVersion + "-2.0." + project.ext.buildNum
+
+version = project.ext.mcVersion + "-3.0." + project.ext.buildNum
 group= "k4unl" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "ServerInfoProvider"
 
@@ -48,11 +49,11 @@ allprojects {
 }
 
 minecraft {
-    version = "${project.ext.mcVersion}-12.18.1.2094"
+	version = "${project.ext.mcVersion}-13.20.0.2263"
     replace "@VERSION@", project.version
     replace "@BUILDNUM@", project.ext.buildNum
 
-    mappings = "snapshot_20160930"
+    mappings = "snapshot_20170405"
 
     runDir = "../Minecraft/"
 }

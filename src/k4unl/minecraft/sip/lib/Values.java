@@ -208,7 +208,7 @@ public class Values {
                 if (itemStack != null) {
                     itemMap.put("unlocalized-name", itemStack.getUnlocalizedName());
                     itemMap.put("localized-name", itemStack.getDisplayName());
-                    itemMap.put("stacksize", itemStack.stackSize);
+                    itemMap.put("stacksize", itemStack.getCount());
                     itemMap.put("metadata", itemStack.getMetadata());
                     itemMap.put("damage", itemStack.getItemDamage());
                     itemMap.put("maxdamage", itemStack.getMaxDamage());
@@ -335,7 +335,7 @@ public class Values {
     private static Map<String, Integer> getDimensions() {
         
         Map<String, Integer> map = new HashMap<String, Integer>();
-        for (WorldServer server : Functions.getServer().worldServers) {
+        for (WorldServer server : Functions.getServer().worlds) {
             //First argument is dimension name.
             map.put(server.provider.getDimensionType().getName(), server.provider.getDimension());
         }
@@ -345,7 +345,7 @@ public class Values {
     private static List<String> getPlayers() {
         
         List<String> players = new ArrayList<String>();
-        for (World world : Functions.getServer().worldServers) {
+        for (World world : Functions.getServer().worlds) {
             for (Object player : world.playerEntities) {
                 players.add(((EntityPlayer) player).getGameProfile().getName());
             }

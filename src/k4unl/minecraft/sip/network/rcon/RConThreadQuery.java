@@ -242,7 +242,7 @@ public class RConThreadQuery extends net.minecraft.network.rcon.RConThreadQuery 
             this.output.writeInt(1);
             this.output.writeString("player_");
             this.output.writeInt(0);
-            String[] astring = this.server.getAllUsernames();
+            String[] astring = this.server.getOnlinePlayerNames();
             String[] astring1 = astring;
             int j = astring.length;
             

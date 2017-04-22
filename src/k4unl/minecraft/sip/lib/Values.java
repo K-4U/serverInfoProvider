@@ -10,6 +10,7 @@ import k4unl.minecraft.sip.api.event.InfoEvent;
 import k4unl.minecraft.sip.storage.Players;
 import net.minecraft.block.properties.*;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -135,6 +136,15 @@ public class Values {
                     } else {
                         //Dimension given
                         ret = getTPS(value.getIntArgument());
+                    }
+                    doNotAddToMap = true;
+                    break;
+                case ENTITIES:
+                    if (value.getArgument().equals("")) {
+                        //Do all dimensions.
+                        ret = getEntities();
+                    } else {
+                        ret = getEntities(value.getIntArgument());
                     }
                     doNotAddToMap = true;
                     break;
@@ -432,6 +442,35 @@ public class Values {
             return getMap(dimensionId, "");
         }
         
+    }
+    
+    
+    private static Map<Integer, Map<String, Integer>> getEntities() {
+        Map<Integer, Map<String, Integer>> ret = new HashMap<>();
+    
+        for (Integer dimId : DimensionManager.getIDs()) {
+            ret.put(dimId, getEntities(dimId));
+        }
+    
+        return ret;
+    }
+    
+    private static Map<String, Integer> getEntities(int dimensionId) {
+        
+        World world = Functions.getWorldServerForDimensionId(dimensionId);
+        Map<String, Integer> ret = new HashMap<>();
+        
+        List<Entity> loadedEntities = world.loadedEntityList;
+        
+        for(Entity entity : loadedEntities){
+            String n = entity.getName();
+            if(!ret.containsKey(n)){
+                ret.put(n, 0);
+            }
+            ret.put(n, ret.get(n) + 1);
+        }
+        
+        return ret;
     }
     
     private static Map<String, Map<String, Integer>> getDeathLeaderboard() {

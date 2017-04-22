@@ -36,6 +36,22 @@ public class SIPRequest implements ISIPRequest {
         }
     }
     
+    public Map<String, Object> getArrayArgument() {
+        if(argument != null){
+            Gson nGson = new Gson();
+            try {
+                return nGson.fromJson(getArgument(), Map.class);
+            } catch (JsonSyntaxException e) {
+                return null;
+            }
+        }
+        return null;
+    }
+    
+    public boolean hasArrayArgument() {
+        return (getArrayArgument() != null);
+    }
+    
     public int getIntArgument() {
         
         if (argument != null) {

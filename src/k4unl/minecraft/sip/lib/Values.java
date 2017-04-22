@@ -2,6 +2,8 @@ package k4unl.minecraft.sip.lib;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.common.ModContainer;
 import k4unl.minecraft.k4lib.lib.Functions;
 import k4unl.minecraft.k4lib.network.EnumSIPValues;
 import k4unl.minecraft.sip.api.event.InfoEvent;
@@ -12,6 +14,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.common.ForgeVersion;
 import net.minecraftforge.common.MinecraftForge;
 
 import java.util.*;
@@ -103,6 +106,10 @@ public class Values {
                     } else {
                         ret = getEntities(value.getIntArgument());
                     }
+                    doNotAddToMap = true;
+                    break;
+                case VERSIONS:
+                    ret = getVersions();
                     doNotAddToMap = true;
                     break;
                 case INVALID:
@@ -298,7 +305,25 @@ public class Values {
         return getMap(playerName, Players.getDeaths(playerName));
     }
 
-    private static <A, B> Map<A, B> getMap(A key, B value){
+    private static Map<String, Object> getVersions(){
+        Map<String, Object> ret = new HashMap<>();
+        ret.put("minecraft", Loader.instance().getMCVersionString());
+        ret.put("mcp", Loader.instance().getMCPVersionString());
+        ret.put("forge", ForgeVersion.getVersion());
+        Map<String, String> mods = new HashMap<>();
+        
+        List<ModContainer> activeModList = Loader.instance().getActiveModList();
+        for (ModContainer mod : activeModList) {
+            mods.put(mod.getName(), mod.getDisplayVersion());
+        }
+        ret.put("mods", mods);
+        
+        return ret;
+    
+    }
+    
+    private static <A, B> Map<A, B> getMap(A key, B value) {
+        
         Map<A, B> ret = new HashMap<A, B>();
         ret.put(key, value);
         return ret;

@@ -5,6 +5,8 @@ import com.google.gson.JsonSyntaxException;
 import k4unl.minecraft.k4lib.lib.Location;
 import k4unl.minecraft.sip.api.ISIPRequest;
 
+import java.util.Map;
+
 /**
  * @author Koen Beckers (K-4U)
  */
@@ -31,6 +33,22 @@ public class SIPRequest implements ISIPRequest {
         } else {
             return "";
         }
+    }
+    
+    public Map<String, Object> getArrayArgument() {
+        if(argument != null){
+            Gson nGson = new Gson();
+            try {
+                return nGson.fromJson(getArgument(), Map.class);
+            } catch (JsonSyntaxException e) {
+                return null;
+            }
+        }
+        return null;
+    }
+    
+    public boolean hasArrayArgument() {
+        return (getArrayArgument() != null);
     }
     
     public int getIntArgument() {

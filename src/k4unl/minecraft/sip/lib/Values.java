@@ -8,9 +8,11 @@ import k4unl.minecraft.k4lib.lib.Functions;
 import k4unl.minecraft.k4lib.network.EnumSIPValues;
 import k4unl.minecraft.sip.api.event.InfoEvent;
 import k4unl.minecraft.sip.storage.Players;
+import k4unl.minecraft.sip.storage.TileEntityInfo;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
@@ -110,6 +112,31 @@ public class Values {
                     break;
                 case VERSIONS:
                     ret = getVersions();
+                    doNotAddToMap = true;
+                    break;
+                case TILES:
+                    if(value.getArgument().equals("")){
+                        ret = "Please supply a dimension id";
+                    } else {
+                        ret = getTileEntities(value.getIntArgument());
+                    }
+                    doNotAddToMap = true;
+                    break;
+                case TILELIST:
+                    if(!value.hasArrayArgument()){
+                        ret = "Please supply a dimension id and an unlocalized name";
+                        break;
+                    }
+                    Map<String, Object> args = value.getArrayArgument();
+                    if(!args.containsKey("dimensionid")){
+                        ret = "Please supply a dimension id";
+                        break;
+                    }
+                    if(!args.containsKey("name")){
+                        ret = "Please supply an unlocalized name";
+                        break;
+                    }
+                    ret = getTileEntitiesInfo((int)(Math.floor((Double) args.get("dimensionid"))), args.get("name").toString().toLowerCase());
                     doNotAddToMap = true;
                     break;
                 case INVALID:
@@ -320,6 +347,46 @@ public class Values {
         
         return ret;
     
+    }
+    
+    private static Map<String, Integer> getTileEntities(int dimensionId) {
+        World world = Functions.getWorldServerForDimensionId(dimensionId);
+        Map<String, Integer> ret = new HashMap<>();
+    
+        List<TileEntity> loadedEntities = world.loadedTileEntityList;
+    
+        for(TileEntity entity : loadedEntities){
+            String n = entity.getClass().getCanonicalName();
+            if(!ret.containsKey(n)){
+                ret.put(n, 0);
+            }
+            ret.put(n, ret.get(n) + 1);
+        }
+    
+        return ret;
+    }
+    
+    
+    private static List<TileEntityInfo> getTileEntitiesInfo(int dimensionId, String tileName) {
+        List<TileEntityInfo> ret = new ArrayList<>();
+    
+        World world = Functions.getWorldServerForDimensionId(dimensionId);
+        List<TileEntity> loadedEntities = world.loadedTileEntityList;
+    
+        
+        int i = 0;
+        for(TileEntity entity : loadedEntities){
+            try {
+                if (entity.getClass().getCanonicalName().equalsIgnoreCase(tileName)) {
+                    ret.add(new TileEntityInfo(entity));
+                }
+            }catch (Exception exception){
+                Log.error(exception.getLocalizedMessage());
+            }
+            i++;
+        }
+        
+        return ret;
     }
     
     private static <A, B> Map<A, B> getMap(A key, B value) {

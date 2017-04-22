@@ -8,8 +8,10 @@ import k4unl.minecraft.k4lib.network.EnumSIPValues;
 import k4unl.minecraft.sip.api.ISIPEntity;
 import k4unl.minecraft.sip.api.event.InfoEvent;
 import k4unl.minecraft.sip.storage.Players;
+import k4unl.minecraft.sip.storage.TileEntityInfo;
 import net.minecraft.block.properties.*;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -18,11 +20,14 @@ import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.common.ForgeVersion;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
@@ -136,6 +141,44 @@ public class Values {
                         //Dimension given
                         ret = getTPS(value.getIntArgument());
                     }
+                    doNotAddToMap = true;
+                    break;
+                case ENTITIES:
+                    if (value.getArgument().equals("")) {
+                        //Do all dimensions.
+                        ret = getEntities();
+                    } else {
+                        ret = getEntities(value.getIntArgument());
+                    }
+                    doNotAddToMap = true;
+                    break;
+                case VERSIONS:
+                    ret = getVersions();
+                    doNotAddToMap = true;
+                    break;
+                case TILES:
+                    if(value.getArgument().equals("")){
+                        ret = "Please supply a dimension id";
+                    } else {
+                        ret = getTileEntities(value.getIntArgument());
+                    }
+                    doNotAddToMap = true;
+                    break;
+                case TILELIST:
+                    if(!value.hasArrayArgument()){
+                        ret = "Please supply a dimension id and an unlocalized name";
+                        break;
+                    }
+                    Map<String, Object> args = value.getArrayArgument();
+                    if(!args.containsKey("dimensionid")){
+                        ret = "Please supply a dimension id";
+                        break;
+                    }
+                    if(!args.containsKey("name")){
+                        ret = "Please supply an unlocalized name";
+                        break;
+                    }
+                    ret = getTileEntitiesInfo((int)(Math.floor((Double) args.get("dimensionid"))), args.get("name").toString().toLowerCase());
                     doNotAddToMap = true;
                     break;
                 case INVALID:
@@ -434,6 +477,35 @@ public class Values {
         
     }
     
+    
+    private static Map<Integer, Map<String, Integer>> getEntities() {
+        Map<Integer, Map<String, Integer>> ret = new HashMap<>();
+    
+        for (Integer dimId : DimensionManager.getIDs()) {
+            ret.put(dimId, getEntities(dimId));
+        }
+    
+        return ret;
+    }
+    
+    private static Map<String, Integer> getEntities(int dimensionId) {
+        
+        World world = Functions.getWorldServerForDimensionId(dimensionId);
+        Map<String, Integer> ret = new HashMap<>();
+        
+        List<Entity> loadedEntities = world.loadedEntityList;
+        
+        for(Entity entity : loadedEntities){
+            String n = entity.getName();
+            if(!ret.containsKey(n)){
+                ret.put(n, 0);
+            }
+            ret.put(n, ret.get(n) + 1);
+        }
+        
+        return ret;
+    }
+    
     private static Map<String, Map<String, Integer>> getDeathLeaderboard() {
         
         return getMap("LEADERBOARD", Players.getDeathLeaderboard());
@@ -442,6 +514,63 @@ public class Values {
     private static Map<String, Map<String, Integer>> getDeathsByPlayer(String playerName) {
         
         return getMap(playerName, Players.getDeaths(playerName));
+    }
+    
+    private static Map<String, Object> getVersions(){
+        Map<String, Object> ret = new HashMap<>();
+        ret.put("minecraft", ForgeVersion.mcVersion);
+        ret.put("mcp", ForgeVersion.mcpVersion);
+        ret.put("forge", ForgeVersion.getVersion());
+        Map<String, String> mods = new HashMap<>();
+        
+        List<ModContainer> activeModList = Loader.instance().getActiveModList();
+        for (ModContainer mod : activeModList) {
+            mods.put(mod.getName(), mod.getDisplayVersion());
+        }
+        ret.put("mods", mods);
+        
+        return ret;
+    
+    }
+    
+    private static Map<String, Integer> getTileEntities(int dimensionId) {
+        World world = Functions.getWorldServerForDimensionId(dimensionId);
+        Map<String, Integer> ret = new HashMap<>();
+    
+        List<TileEntity> loadedEntities = world.tickableTileEntities;
+    
+        for(TileEntity entity : loadedEntities){
+            String n = entity.getClass().getCanonicalName();
+            if(!ret.containsKey(n)){
+                ret.put(n, 0);
+            }
+            ret.put(n, ret.get(n) + 1);
+        }
+    
+        return ret;
+    }
+    
+    
+    private static List<TileEntityInfo> getTileEntitiesInfo(int dimensionId, String tileName) {
+        List<TileEntityInfo> ret = new ArrayList<>();
+    
+        World world = Functions.getWorldServerForDimensionId(dimensionId);
+        List<TileEntity> loadedEntities = world.tickableTileEntities;
+    
+        
+        int i = 0;
+        for(TileEntity entity : loadedEntities){
+            try {
+                if (entity.getClass().getCanonicalName().equalsIgnoreCase(tileName)) {
+                    ret.add(new TileEntityInfo(entity));
+                }
+            }catch (Exception exception){
+                Log.error(exception.getLocalizedMessage());
+            }
+            i++;
+        }
+        
+        return ret;
     }
     
     private static <A, B> Map<A, B> getMap(A key, B value) {

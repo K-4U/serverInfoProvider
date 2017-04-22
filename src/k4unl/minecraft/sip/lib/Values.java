@@ -19,11 +19,14 @@ import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.common.ForgeVersion;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
@@ -146,6 +149,10 @@ public class Values {
                     } else {
                         ret = getEntities(value.getIntArgument());
                     }
+                    doNotAddToMap = true;
+                    break;
+                case VERSIONS:
+                    ret = getVersions();
                     doNotAddToMap = true;
                     break;
                 case INVALID:
@@ -481,6 +488,23 @@ public class Values {
     private static Map<String, Map<String, Integer>> getDeathsByPlayer(String playerName) {
         
         return getMap(playerName, Players.getDeaths(playerName));
+    }
+    
+    private static Map<String, Object> getVersions(){
+        Map<String, Object> ret = new HashMap<>();
+        ret.put("minecraft", ForgeVersion.mcVersion);
+        ret.put("mcp", ForgeVersion.mcpVersion);
+        ret.put("forge", ForgeVersion.getVersion());
+        Map<String, String> mods = new HashMap<>();
+        
+        List<ModContainer> activeModList = Loader.instance().getActiveModList();
+        for (ModContainer mod : activeModList) {
+            mods.put(mod.getName(), mod.getDisplayVersion());
+        }
+        ret.put("mods", mods);
+        
+        return ret;
+    
     }
     
     private static <A, B> Map<A, B> getMap(A key, B value) {

@@ -228,7 +228,7 @@ public class Values {
         
         return endString;
     }
-    
+
     private static Map<String, Object> getInventoryInfo(Location loc, EnumFacing side) {
         
         //Return a single Key-Value pair of strings.
@@ -307,6 +307,7 @@ public class Values {
             
             String type = "";
             List<String> possibleValues = new ArrayList<>();
+            // My IDE says this is wrong, but it compiles anyway. *shrugs*
             if (iproperty instanceof PropertyDirection) {
                 type = "direction";
             } else if (iproperty instanceof PropertyEnum) {

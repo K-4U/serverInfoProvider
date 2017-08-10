@@ -344,7 +344,7 @@ public class RConThreadQuery extends net.minecraft.network.rcon.RConThreadQuery 
     public void startThread() {
         
         try {
-            Thread.sleep(4000);
+            Thread.sleep(250);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

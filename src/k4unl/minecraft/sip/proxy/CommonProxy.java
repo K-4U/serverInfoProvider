@@ -35,7 +35,7 @@ public class CommonProxy {
             DedicatedServer theServer = (DedicatedServer) event.getServer();
             
             try {
-                Field thread = ReflectionHelper.findField(theServer.getClass(), "theRConThreadQuery", "field_71342_m");
+                Field thread = ReflectionHelper.findField(theServer.getClass(), "rconQueryThread", "field_71342_m");
                 if (theServer.getBooleanProperty("enable-query", false)) {
                     Field isRunning = ReflectionHelper.findField(RConThreadBase.class, "running", "field_72619_a");
                     Log.info("Disabling vanilla query listener");

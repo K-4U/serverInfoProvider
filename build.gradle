@@ -11,27 +11,24 @@ buildscript {
     }
 }
 
-apply plugin: 'net.minecraftforge.gradle.forge'
-
 
 repositories {
     maven {
-        name "modmaven"
-        url "http://modmaven.k-4u.nl"
+        name "ModMaven"
+        url "https://modmaven.k-4u.nl"
     }
-    /*maven {
-        name "IC2"
-        url "http://maven.ic2.player.to/"
-    }*/
 }
+
+
+apply plugin: 'net.minecraftforge.gradle.forge'
 
 project.ext {
     buildNum = System.getenv("BUILD_NUMBER")
-    mcVersion="1.12"
+    mcVersion="1.12.1"
 }
 
 dependencies {
-    deobfCompile "k4unl:k4lib:${project.ext.mcVersion}-2.1.77:universal"
+    deobfCompile "k4unl:k4lib:${project.ext.mcVersion}-2.1.79:universal"
     compile "net.industrial-craft:industrialcraft-2:2.6.84-ex110:api"
 }
 
@@ -49,11 +46,11 @@ allprojects {
 }
 
 minecraft {
-	version = "${project.ext.mcVersion}-14.21.1.2387"
+    version = "${project.ext.mcVersion}-14.22.0.2452"
     replace "@VERSION@", project.version
     replace "@BUILDNUM@", project.ext.buildNum
 
-    mappings = "snapshot_20170405"
+    mappings = "snapshot_20170810"
 
     runDir = "../Minecraft/"
 }

@@ -1,6 +1,5 @@
 package k4unl.minecraft.sip.events;
 
-import cofh.api.energy.IEnergyHandler;
 import ic2.api.tile.IEnergyStorage;
 import k4unl.minecraft.k4lib.lib.Functions;
 import k4unl.minecraft.sip.api.ISIPRequest;
@@ -29,7 +28,7 @@ public class EnergyEvent {
             
             //RF
             TileEntity tileEntity = request.getPosArgument().getTE(Functions.getWorldServerForDimensionId(request.getPosArgument().getDimension()));
-            if (tileEntity instanceof IEnergyHandler) {
+            /*if (tileEntity instanceof IEnergyHandler) {
                 if (request.hasArgumentSide()) {
                     
                     event.addInfo("stored", ((IEnergyHandler) tileEntity).getEnergyStored(request.getSideArgument()));
@@ -39,7 +38,7 @@ public class EnergyEvent {
                     event.addInfo("warning", "There is an RF storage at these coordinates, but no side argument given!");
                 }
                 
-            }
+            }*/
             
             // EU
             if(Loader.isModLoaded("IC2")){

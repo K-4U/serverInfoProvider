@@ -1,15 +1,5 @@
 package k4unl.minecraft.sip.network;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.internal.LinkedTreeMap;
-import k4unl.minecraft.k4lib.network.EnumSIPValues;
-import k4unl.minecraft.sip.lib.Log;
-import k4unl.minecraft.sip.lib.SIPRequest;
-import k4unl.minecraft.sip.lib.Values;
-import k4unl.minecraft.sip.lib.config.SIPConfig;
-
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -20,6 +10,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
+
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.internal.LinkedTreeMap;
+
+import k4unl.minecraft.k4lib.network.EnumSIPValues;
+import k4unl.minecraft.sip.lib.Log;
+import k4unl.minecraft.sip.lib.SIPRequest;
+import k4unl.minecraft.sip.lib.Values;
+import k4unl.minecraft.sip.lib.config.SIPConfig;
 
 /**
  * @author Koen Beckers (K-4U)
@@ -58,7 +59,7 @@ public class TCPServerThread implements Runnable {
                     try {
                         connectionSocket.setSoTimeout(5000);
                         
-                        Log.info("New connection from " + connectionSocket.getRemoteSocketAddress().toString());
+                        Log.debug("New connection from " + connectionSocket.getRemoteSocketAddress().toString());
                         
                         BufferedReader inFromClient =
                                 new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));

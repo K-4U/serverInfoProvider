@@ -1,7 +1,7 @@
 package k4unl.minecraft.sip.api;
 
 import k4unl.minecraft.k4lib.lib.Location;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 
 /**
  * @author Koen Beckers (K-4U)
@@ -44,13 +44,13 @@ public interface ISIPRequest {
      * @return
      */
     boolean isArgumentPos();
-    
+
     /**
      * Use this to fetch the side-part of an argument. Note that this CAN be null!
      *
-     * @return a {@link net.minecraft.util.EnumFacing} object with the side.
+     * @return a {@link net.minecraft.util.Direction} object with the side.
      */
-    EnumFacing getSideArgument();
+    Direction getSideArgument();
     
     /**
      * Use this to check if there is a valid side given with the argument

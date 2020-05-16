@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import k4unl.minecraft.k4lib.lib.Location;
 import k4unl.minecraft.sip.api.ISIPRequest;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 
 import java.util.Map;
 
@@ -74,15 +74,15 @@ public class SIPRequest implements ISIPRequest {
             return null;
         }
     }
-    
-    public EnumFacing getSideArgument() {
-        
+
+    public Direction getSideArgument() {
+
         if (argument != null) {
             Gson nGson = new Gson();
             try {
                 Map<String, Object> arg = nGson.fromJson(getArgument(), Map.class);
                 if (arg.containsKey("side")) {
-                    return EnumFacing.byName((String) arg.get("side"));
+                    return Direction.byName((String) arg.get("side"));
                 } else {
                     return null;
                 }

@@ -1,7 +1,6 @@
 package k4unl.minecraft.sip.lib;
 
 import k4unl.minecraft.sip.lib.config.ModInfo;
-import k4unl.minecraft.sip.lib.config.SIPConfig;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,8 +29,8 @@ public class Log {
 
 
     public static void debug(String message){
-        if(SIPConfig.INSTANCE.getBool("debug")){
+//        if(SIPConfig.debug.get()){
             logger.log(Level.INFO, message);
-        }
+//        }
     }
 }
